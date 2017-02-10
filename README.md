@@ -28,7 +28,9 @@ optional arguments:
   -y				skip confirmation step
 ```
 
-Note that it is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. Only ```lossless``` and ```deep-lossless``` are options for ```unshrink```.
+It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. 
+
+Note that only ```lossless``` and ```deep-lossless``` are options for ```unshrink```.
 
 ## Compression Modes ##
 
