@@ -1,51 +1,66 @@
+from __future__ import print_function
 import h5py
 import sys
 import os
 from multiprocessing import Pool
 from argparse import ArgumentParser
-from __future__ import print_function
+from subprocess import Popen
 
 def parseArgs(argv):
-	parser = ArgumentParser(argv, description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
+	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
+	parser.add_argument("command", choices=('shrink', 'unshrink'), help="Choose between shrinking and unshrinking files")
 	parser.add_argument("-l", "--lossless", default=False, action="store_true", help="Shrinks files with no data loss")
 	parser.add_argument("--raw", default=False, action="store_true", help="Reverts files to raw signal data only")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads")
 	parser.add_argument("-g", "--group", default="all", help="Group number allows discrimination between different basecalling runs (default: all)")
-	parser.add_argument("-y", type="store_true", default=False, help="Skip confirm step")
-	parser.add_argument("command", nargs="1", choices=('shrink', 'unshrink')help="Choose between shrinking and unshrinking files", required=True)
-	parser.add_argument("input", nargs="*", help="List of directories or fast5 files to shrink", required=True)
+	parser.add_argument("-y", action="store_true", default=False, help="Skip confirm step")
+	parser.add_argument("input", nargs="*", help="List of directories or fast5 files to shrink")
+	return parser.parse_args()
 
 def findEvents(file, group_id):
 	eventPaths = []
 	analyses = file.get("Analyses")
-	subgroups = analyses.items()
-	for group in subgroups:
-		if group_id = "all" or group.endswith(group_id):
-			for event_group in group:
-				eventPaths.append(event_group.name + "/Events") # TODO: is this right?
-	return eventPaths
-				
+	for group in analyses.values():
+		if group_id == "all" or group.endswith(group_id):
+			for event_group in group.values():
+				if "Events" in event_group.keys():
+					eventPaths.append("{}/Events".format(event_group.name)) 
+	return eventPaths	
 	
-def rewriteDataset(file, path, compression, compression_opts):
-	dataset = file.get(path)
+def rewriteDataset(file, path, compression="gzip", compression_opts=4):
+	dataset = file.get(path).value
 	del file[path]
-	file.create_dataset(path, dataset, compression=compression, compression_opts=compression_opts)
-	
-def losslessCompress(filename):
-	with h5py.File(filename, 'r+') as file:
-		eventsPath = "Analyses/Basecall_1D_000/BaseCalled_template/Events"
-		rewriteDataset(file, eventsPath, "gzip", 9)
+	file.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
+
+def losslessCompress(f, group):
+	for path in findEvents(f, group):
+		rewriteDataset(f, path, "gzip", 9)
+	return "GZIP=9"
+
+def compress(func, filename, group):
+	with h5py.File(filename, 'r+') as f:
+		filtr = func(f, group)
+	Popen(["h5repack","-f",filtr,filename,"{}.tmp".format(filename)])
+	Popen(["mv","{}.tmp".format(filename),filename])
+
+def compressWrapper(args):
+	return compress(*args)
 		
-def losslessDecompress(filename):
-	with h5py.File(filename, 'r+') as file:
-		eventsPath = "Analyses/Basecall_1D_000/BaseCalled_template/Events"
-		rewriteDataset(file, eventsPath, None, None)
+def losslessDecompress(f, group):
+	for path in findEvents(f, group):
+		rewriteDataset(f, path)
+	return "GZIP=4"
+
+def losslessDecompressWrapper(args):
+	return losslessDecompress(*args)
 		
-def rawCompress(filename):
-	with h5py.File(filename, 'r+') as file:
-		basecallPath = "Analyses/Basecall_1D_000/BaseCalled_template/Events"
-		eventsPath = "Analyses/EventDetection_000/BaseCalled_template/Events"
-		del file[eventsPath]
+def rawCompress(f, group):
+	for path in findEvents(f, group):
+		del f[path]
+	return "GZIP=9"
+
+def rawCompressWrapper(args):
+	return rawCompress(*args)
 		
 def chooseShrinkFunc(args):
 	if args.command == "shrink":
@@ -64,6 +79,7 @@ def chooseShrinkFunc(args):
 	except NameError:
 		print("No shrinking method selected")
 		exit()
+	return func
 		
 def recursiveFindFast5(input):
 	files = []
@@ -75,7 +91,7 @@ def recursiveFindFast5(input):
 	return files
 	
 def checkSure():
-	response = input("Are you sure? (yes|no): ")
+	response = raw_input("Are you sure? (yes|no): ")
 	if "yes".startswith(response):
 		return 1
 	else:
@@ -85,10 +101,14 @@ def run(argv):
 	args = parseArgs(argv)
 	func = chooseShrinkFunc(args)
 	fileList = recursiveFindFast5(args.input)
-	print("on {} files... ".format(len(fileList)), end='', flush=True)
-	if args.yes or checkSure():
-		pool = Pool(args.threads)
-		pool.map(func, fileList)
+	print("on {} files... ".format(len(fileList)))
+	if args.y or checkSure():
+		if args.threads <= 1:
+			[compress(func,f, args.group) for f in fileList]
+		else:
+			argList = [[func, f, args.group] for f in fileList]
+			pool = Pool(args.threads)
+			pool.map(compressWrapper, argList)
 		print("Complete.")
 	else:
 		print("User cancelled. Exiting.")
