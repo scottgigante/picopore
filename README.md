@@ -7,6 +7,11 @@ Options:
 - Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and FASTQ
 - Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset (not yet implemented)
 
+## Usage ##
+
+```usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]```
+
+
 ## FAQs ##
 
 ### Why would I want to shrink my fast5 files? ###
