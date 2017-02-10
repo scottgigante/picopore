@@ -16,11 +16,11 @@ Options:
   input                 	List of directories or fast5 files to shrink
 
 optional arguments:
-  -h, --help            	show this help message and exit
-  -l, --lossless        	shrinks files with no data loss
-  --raw                 	reverts files to raw signal data only
-  -t THREADS, --threads THREADS	number of threads
-  -g GROUP, --group GROUP	Group number allows discrimination between different basecalling runs (default: all)
+  --help		show this help message and exit
+  --lossless	shrinks files with no data loss
+  --raw				reverts files to raw signal data only
+  --threads THREADS	number of threads
+  --group GROUP		Group number allows discrimination between different basecalling runs (default: all)
   -y				Skip confirm step```
 
 ## FAQs ##
