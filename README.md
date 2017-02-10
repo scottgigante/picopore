@@ -31,10 +31,12 @@ optional arguments:
 
 | Functionality        | Lossless | Deep Lossless | Raw | Minimal |
 |:--------------------:|:--------:|:-------------:|:---:|:-------:|
-| Metrichor            |    ✔     |       ✔       |  ✔  |    ✔    | 
-| nanonetcall          |    ✔     |       ✔       |  ✔  |    ✔    | 
-| poretools fastq      |    ✔     |       ✔       |  ✔  |    ✘    | 
-| nanopolish consensus |    ✓     |       ✘       |  ✘  |    ✘    | 
+| Metrichor            |    ✓     |       ✓       |  ✓  |    ✓    | 
+| nanonetcall          |    ✓     |       ✓       |  ✓  |    ✓    | 
+| poretools fastq      |    ✓     |       ✓       |  ✓  | ```nanonetcall``` | 
+| nanopolish consensus |    ✓     | ```picopore unshrink``` |  ```nanonetcall```  | ```nanonetcall``` | 
+
+| Data Recovery | Lossless | Deep Lossless | Raw | Minimal |
 
 ## FAQs ##
 
