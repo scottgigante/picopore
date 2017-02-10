@@ -1,4 +1,4 @@
-#Picopore v 0.1.0 #
+# Picopore v 0.1.0 #
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
@@ -11,6 +11,17 @@ Options:
 
 ```usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]```
 
+```positional arguments:
+  {shrink,unshrink}     	Choose between shrinking and unshrinking files
+  input                 	List of directories or fast5 files to shrink
+
+optional arguments:
+  -h, --help            	show this help message and exit
+  -l, --lossless        	shrinks files with no data loss
+  --raw                 	reverts files to raw signal data only
+  -t THREADS, --threads THREADS	number of threads
+  -g GROUP, --group GROUP	Group number allows discrimination between different basecalling runs (default: all)
+  -y				Skip confirm step```
 
 ## FAQs ##
 
