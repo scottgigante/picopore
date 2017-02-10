@@ -1,4 +1,4 @@
-### Picopore v 0.1.0 ###
+#Picopore v 0.1.0 #
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
@@ -9,7 +9,7 @@ Options:
 
 ## FAQs ##
 
-# Why would I want to shrink my fast5 files? #
+### Why would I want to shrink my fast5 files? ###
 
 Nanopore runs are big. Really big. Over a long period of time, the storage footprint of a Nanopore lab will increase to unsustainable levels.
 
@@ -17,7 +17,7 @@ A large proportion of the data stored in ONT's fast5 files is unnecessary for th
 
 Picopore solves this problem. Without removing the raw signal or configuration data used for basecalling, Picopore removes the intermediary datasets to reduce the size of your Nanopore dataset.
 
-# Do I lose functionality when using Picopore? #
+### Do I lose functionality when using Picopore? ###
 
 Lossless compression uses HDF5's builtin compression, so all existing fast5 tools will work seamlessly. 
 - Use case: power users who wish to reduce server storage footprint
