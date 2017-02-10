@@ -29,14 +29,12 @@ optional arguments:
 
 ## Compression Modes ##
 
-| Left align | Right align | Center align |
-|:-----------|------------:|:------------:|
-| This       |        This |     This     
-| column     |      column |    column    
-| will       |        will |     will     
-| be         |          be |      be      
-| left       |       right |    center    
-| aligned    |     aligned |   aligned
+| Functionality        | Lossless | Deep Lossless | Raw | Minimal |
+|:--------------------:|:--------:|:-------------:|:---:|:-------:|
+| Metrichor            |    ✔     |       ✔       |  ✔  |    ✔    | 
+| nanonetcall          |    ✔     |       ✔       |  ✔  |    ✔    | 
+| poretools fastq      |    ✔     |       ✔       |  ✔  |    ✘    | 
+| nanopolish consensus |    ✔     |       ✘       |  ✘  |    ✘    | 
 
 ## FAQs ##
 
