@@ -11,7 +11,8 @@ Options:
 
 ```usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]```
 
-```positional arguments:
+```
+positional arguments:
   {shrink,unshrink}     	Choose between shrinking and unshrinking files
   input                 	List of directories or fast5 files to shrink
 
@@ -21,7 +22,8 @@ optional arguments:
   --raw				reverts files to raw signal data only
   --threads THREADS	number of threads
   --group GROUP		Group number allows discrimination between different basecalling runs (default: all)
-  -y				Skip confirm step```
+  -y				Skip confirm step
+```
 
 ## FAQs ##
 
