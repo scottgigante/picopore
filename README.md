@@ -9,7 +9,9 @@ Options:
 
 ## Usage ##
 
-```usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]```
+```
+usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]
+```
 
 ```
 positional arguments:
@@ -17,13 +19,24 @@ positional arguments:
   input                 	List of directories or fast5 files to shrink
 
 optional arguments:
-  --help		show this help message and exit
-  --lossless	shrinks files with no data loss
+  --help			show this help message and exit
+  --lossless		shrinks files with no data loss
   --raw				reverts files to raw signal data only
   --threads THREADS	number of threads
   --group GROUP		Group number allows discrimination between different basecalling runs (default: all)
   -y				Skip confirm step
 ```
+
+## Compression Modes ##
+
+| Left align | Right align | Center align |
+|:-----------|------------:|:------------:|
+| This       |        This |     This     
+| column     |      column |    column    
+| will       |        will |     will     
+| be         |          be |      be      
+| left       |       right |    center    
+| aligned    |     aligned |   aligned
 
 ## FAQs ##
 
