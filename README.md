@@ -16,17 +16,19 @@ usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y]
 
 ```
 positional arguments:
-  {shrink,unshrink}     	Choose between shrinking and unshrinking files
-  input                 	List of directories or fast5 files to shrink
+  {shrink,unshrink}	choose between shrinking and unshrinking files
+  input				list of directories or fast5 files to shrink
 
 optional arguments:
   --help			show this help message and exit
   --lossless		shrinks files with no data loss
   --raw				reverts files to raw signal data only
   --threads THREADS	number of threads
-  --group GROUP		Group number allows discrimination between different basecalling runs (default: all)
-  -y				Skip confirm step
+  --group GROUP		group number allows discrimination between different basecalling runs (default: all)
+  -y				skip confirmation step
 ```
+
+Note that it is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. Only ```lossless``` and ```deep-lossless``` are options for ```unshrink```.
 
 ## Compression Modes ##
 
