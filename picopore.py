@@ -17,17 +17,22 @@ def parseArgs(argv):
 	parser.add_argument("input", nargs="*", help="List of directories or fast5 files to shrink")
 	return parser.parse_args()
 
-def findEvents(file, group_id):
+def recursiveFindEvents(group):
 	eventPaths = []
-	analyses = file.get("Analyses")
+	if type(group).__name__ == "Group":
+		for subgroup in group.values():
+			eventPaths.extend(recursiveFindEvents(subgroup))
+	elif group.name.endswith("Events") or group.name.endswith("Alignment"):
+		eventPaths.append(group.name)
+	return eventPaths
+	
+
+def findEvents(f, group_id):
+	eventPaths = []
+	analyses = f.get("Analyses")
 	for group in analyses.values():
-		if group_id == "all" or group.endswith(group_id) and type(group).__name__ == "Group":
-			for event_group in group.values():
-				if type(event_group).__name__ == "Group":
-					if "Events" in event_group.keys():
-						eventPaths.append("{}/Events".format(event_group.name)) 
-					elif "Alignment" in event_group.keys():
-						eventPaths.append("{}/Alignment".format(event_group.name))
+		if group_id == "all" or group.endswith(group_id):
+			eventPaths.extend(recursiveFindEvents(group))
 	return eventPaths	
 	
 def rewriteDataset(f, path, compression="gzip", compression_opts=1):
@@ -47,9 +52,6 @@ def losslessDecompress(f, group):
 	for path in findEvents(f, group):
 		rewriteDataset(f, path)
 	return "GZIP=1"
-
-def deepLosslessCompress(f, group):
-	paths = findEvents(f,group)
 		
 def rawCompress(f, group):
 	for path in findEvents(f, group):
