@@ -4,7 +4,7 @@ import sys
 import os
 from multiprocessing import Pool
 from argparse import ArgumentParser
-from subprocess import Popen
+import subprocess
 
 def parseArgs(argv):
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
@@ -21,46 +21,49 @@ def findEvents(file, group_id):
 	eventPaths = []
 	analyses = file.get("Analyses")
 	for group in analyses.values():
-		if group_id == "all" or group.endswith(group_id):
+		if group_id == "all" or group.endswith(group_id) and type(group).__name__ == "Group":
 			for event_group in group.values():
-				if "Events" in event_group.keys():
-					eventPaths.append("{}/Events".format(event_group.name)) 
+				if type(event_group).__name__ == "Group":
+					if "Events" in event_group.keys():
+						eventPaths.append("{}/Events".format(event_group.name)) 
+					elif "Alignment" in event_group.keys():
+						eventPaths.append("{}/Alignment".format(event_group.name))
 	return eventPaths	
 	
-def rewriteDataset(file, path, compression="gzip", compression_opts=4):
-	dataset = file.get(path).value
-	del file[path]
-	file.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
+def rewriteDataset(f, path, compression="gzip", compression_opts=1):
+	attrs = f.get(path).attrs
+	dataset = f.get(path).value
+	del f[path]
+	f.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
+	for name, value in attrs.items():
+		f[path].attrs[name] = value
 
 def losslessCompress(f, group):
 	for path in findEvents(f, group):
 		rewriteDataset(f, path, "gzip", 9)
 	return "GZIP=9"
-
-def compress(func, filename, group):
-	with h5py.File(filename, 'r+') as f:
-		filtr = func(f, group)
-	Popen(["h5repack","-f",filtr,filename,"{}.tmp".format(filename)])
-	Popen(["mv","{}.tmp".format(filename),filename])
-
-def compressWrapper(args):
-	return compress(*args)
 		
 def losslessDecompress(f, group):
 	for path in findEvents(f, group):
 		rewriteDataset(f, path)
-	return "GZIP=4"
+	return "GZIP=1"
 
-def losslessDecompressWrapper(args):
-	return losslessDecompress(*args)
+def deepLosslessCompress(f, group):
+	paths = findEvents(f,group)
 		
 def rawCompress(f, group):
 	for path in findEvents(f, group):
 		del f[path]
 	return "GZIP=9"
 
-def rawCompressWrapper(args):
-	return rawCompress(*args)
+def compress(func, filename, group):
+	with h5py.File(filename, 'r+') as f:
+		filtr = func(f, group)
+	subprocess.call(["h5repack","-f",filtr,filename,"{}.tmp".format(filename)])
+	subprocess.Popen(["mv","{}.tmp".format(filename),filename])
+
+def compressWrapper(args):
+	return compress(*args)
 		
 def chooseShrinkFunc(args):
 	if args.command == "shrink":
