@@ -34,7 +34,7 @@ optional arguments:
 | Metrichor            |    ✔     |       ✔       |  ✔  |    ✔    | 
 | nanonetcall          |    ✔     |       ✔       |  ✔  |    ✔    | 
 | poretools fastq      |    ✔     |       ✔       |  ✔  |    ✘    | 
-| nanopolish consensus |    ✔     |       ✘       |  ✘  |    ✘    | 
+| nanopolish consensus |    ✓     |       ✘       |  ✘  |    ✘    | 
 
 ## FAQs ##
 
