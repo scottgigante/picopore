@@ -16,6 +16,10 @@
 """
 
 import os
+from __future__ import print_function
+
+def log(message, end='\n'):
+	print(message, end)
 
 def recursiveFindFast5(input):
 	files = []

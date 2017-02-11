@@ -14,19 +14,9 @@
     You should have received a copy of the GNU General Public License
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-from __future__ import print_function
-import h5py
-import os
-from multiprocessing import Pool
-import subprocess
 from numpy.lib.recfunctions import drop_fields, append_fields
+import subprocess
 import numpy as np
-
-from parse_args import parseArgs
-from util import isGroup, getDtype, findEvents, rewriteDataset, recursiveCollapseGroups, uncollapseGroups
-
-__basegroup_name__ = "Picopore"
 
 def deepLosslessCompress(f, group):
 	paths = findEvents(f, group)
@@ -113,57 +103,3 @@ def compress(func, filename, group):
 
 def compressWrapper(args):
 	return compress(*args)
-		
-def chooseShrinkFunc(args):
-	if args.command == "shrink":
-		if args.lossless:
-			func = losslessCompress
-			name = "Performing lossless compression "
-		elif args.raw:
-			func = rawCompress
-			name = "Reverting to raw signal "
-	else:
-		if args.lossless:
-			func = losslessDecompress
-			name = "Performing lossless decompression "
-	try:
-		print(name, end='')
-	except NameError:
-		print("No shrinking method selected")
-		exit()
-	return func
-		
-def recursiveFindFast5(input):
-	files = []
-	for path in input:
-		if os.path.isdir(path):
-			files.extend(recursiveFindFast5(os.listdir(path)))
-		elif os.path.isfile(path) and path.endswith(".fast5"):
-			files.append(path)
-	return files
-	
-def checkSure():
-	response = raw_input("Are you sure? (yes|no): ")
-	if "yes".startswith(response):
-		return 1
-	else:
-		return 0
-	
-def main():
-	args = parseArgs()
-	func = chooseShrinkFunc(args)
-	fileList = recursiveFindFast5(args.input)
-	print("on {} files... ".format(len(fileList)))
-	if args.y or checkSure():
-		if args.threads <= 1:
-			[compress(func,f, args.group) for f in fileList]
-		else:
-			argList = [[func, f, args.group] for f in fileList]
-			pool = Pool(args.threads)
-			pool.map(compressWrapper, argList)
-		print("Complete.")
-	else:
-		print("User cancelled. Exiting.")
-
-if __name__ == "__main__":
-	main()

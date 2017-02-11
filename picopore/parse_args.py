@@ -16,6 +16,7 @@
 """
 
 from argparse import ArgumentParser
+from util import log
 
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
@@ -41,9 +42,9 @@ def chooseShrinkFunc(args):
 			func = losslessDecompress
 			name = "Performing lossless decompression "
 	try:
-		print(name, end='')
+		log(name, end='')
 	except NameError:
-		print("No shrinking method selected")
+		log("No shrinking method selected")
 		exit()
 	return func
 	
