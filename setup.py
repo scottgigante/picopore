@@ -5,11 +5,6 @@ version_py = os.path.join(os.path.dirname(__file__), 'picopore', 'version.py')
 version = open(version_py).read().strip().split('=')[-1].replace('"','').strip()
 print version
 
-HERE = os.path.dirname(__file__)
-
-with open(os.path.join(HERE, "requirements.txt"), "r") as f:
-    install_requires = [x.strip() for x in f.readlines()]
-
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
@@ -22,9 +17,7 @@ setup(
   packages = ['picopore'],
   package_dir={'picopore': "picopore"},
   version=version,
-  zip_safe=False,
-  include_package_data=True,
-  install_requires=install_requires,
+  install_requires=['h5py>2.2.0'],
   requires=['python (>=2.7, <3.0)'],
   description = 'A tool for reducing the size of Oxford Nanopore Technologies\' datasets without losing information.',
   long_description=read('README'),
@@ -40,6 +33,5 @@ setup(
 		],
   entry_points = {
         'console_scripts': ['picopore = picopore.picopore:main'],
-		
     },
 )
