@@ -95,7 +95,7 @@ def deepLosslessDecompress(f, group):
 		print("No event detection detected. Performing regular lossless decompression.")
 	else:
 		eventDetectionPath = eventDetectionPaths[0]
-		sampleRate = f["UniqueGlobalKey/channel_id"]["sampling_rate"]
+		sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
 		paths.remove(eventDetectionPath)
 		for path in paths:
 			if path.endswith("Events"):
@@ -104,12 +104,12 @@ def deepLosslessDecompress(f, group):
 				if "mean" not in dataset.dtype.names:
 					start = dataset["start"][0]
 					end = dataset["start"][-1] + 1
-					assert(end - start == dataset.shape[0]) # hopefully!
-					# otherwise, event by event
-					eventData = f[eventDetectionPath].value[start:end]
-					drop_fields(dataset, "start")
+					eventData = f[eventDetectionPath].value
+					eventData = eventData[np.logical_and(eventData["start"] >= start,eventData["start"] < end)]
+					dataset = drop_fields(dataset, "start")
 					start = [i/sampleRate for i in eventData["start"]]
-					append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"]])	
+					dataset = append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"]])	
+					rewriteDataset(f, path, dataset=dataset)
 	return losslessDecompress(f, group)
 
 def losslessCompress(f, group):

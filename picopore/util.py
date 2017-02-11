@@ -115,3 +115,4 @@ def uncollapseGroups(f, basegroup):
 			else:
 				raise e
 		f[groupname].attrs.create(attrname, v, dtype=getDtype(v))
+	del f[basegroup.name]
