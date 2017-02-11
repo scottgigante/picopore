@@ -71,10 +71,14 @@ def recursiveFindEvents(group):
 
 def findEvents(f, group_id):
 	eventPaths = []
-	analyses = f.get("Analyses")
-	for group in analyses.values():
-		if group_id == "all" or group.endswith(group_id):
-			eventPaths.extend(recursiveFindEvents(group))
+	try:
+		analyses = f.get("Analyses")
+		for group in analyses.values():
+			if group_id == "all" or group.endswith(group_id):
+				eventPaths.extend(recursiveFindEvents(group))
+	except AttributeError:
+		# no analyses, dont worry
+		pass
 	return eventPaths	
 	
 def rewriteDataset(f, path, compression="gzip", compression_opts=1):
@@ -86,15 +90,15 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1):
 		f[path].attrs[name] = value
 		
 def recursiveCollapseGroups(f, basegroup, path, group):
-	for subname, object in group:
+	for subname, object in group.items():
 		subpath = "{}\/{}".format(path, subname)
 		if isGroup(object):
 			recursiveCollapseGroups(f, basegroup, subpath, object)
 		else:
-			f.move(object.name, "{}/{}".format(basename, subpath))
+			f.move(object.name, "{}/{}".format(basegroup, subpath))
 		for k, v in group.attrs.items():
-			basegroup.attrs.create("{}\/{}".format(subpath, k), v, dtype=getMinDtype(v))
-	del f[path]
+			f[basegroup].attrs.create("{}\/{}".format(subpath, k), v, dtype=getDtype(v))
+	del f[group.name]
 
 def uncollapseGroups(f, basegroup):
 	for name, object in basegroup.items():
@@ -103,5 +107,11 @@ def uncollapseGroups(f, basegroup):
 		k = k.split("\/")
 		groupname = "/".join(k[:-1])
 		attrname = k[-1]
-		f.create_group(groupname)
-		f[groupname].attrs.create(attrname, v, dtype=getMinDtype(v))
+		try:
+			f.create_group(groupname)
+		except ValueError as e:
+			if e.message == "Unable to create group (Name already exists)":
+				pass
+			else:
+				raise e
+		f[groupname].attrs.create(attrname, v, dtype=getDtype(v))

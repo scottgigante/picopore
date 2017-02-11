@@ -21,63 +21,75 @@ from numpy.lib.recfunctions import drop_fields, append_fields
 
 from util import log, isGroup, getDtype, findEvents, rewriteDataset, recursiveCollapseGroups, uncollapseGroups
 
+__basegroup_name__ = "Picopore"
+
 def chooseCompressFunc(args):
-	if args.command == "shrink":
-		if args.lossless:
-			func = losslessCompress
-			name = "Performing lossless compression "
-		elif args.raw:
-			func = rawCompress
-			name = "Reverting to raw signal "
-	else:
-		if args.lossless:
+	if args.revert:
+		if 'lossless'.startswith(args.mode):
 			func = losslessDecompress
 			name = "Performing lossless decompression "
+		elif 'deep-lossless'.startswith(args.mode):
+			func = deepLosslessDecompress
+			name = "Performing deep lossless decompression "
+		else:
+			log("Unable to revert raw files. Please use a basecaller instead.")
+			exit(1)
+	else:
+		if 'lossless'.startswith(args.mode):
+			func = losslessCompress
+			name = "Performing lossless compression "
+		elif 'deep-lossless'.startswith(args.mode):
+			func = deepLosslessCompress
+			name = "Performing deep lossless compression "
+		elif args.raw:
+			func = rawCompress
+			name = "Performing raw compression "
 	try:
 		log(name, end='')
 	except NameError:
 		log("No shrinking method selected")
-		exit()
+		exit(1)
 	return func
 
 def deepLosslessCompress(f, group):
 	paths = findEvents(f, group)
 	eventDetectionPaths = [path for path in paths if "EventDetection" in path]
 	# TODO: what happens if there are multiple event detections? Is this even possible?
-	if len(eventDetectionPaths > 1):
+	if len(eventDetectionPaths) > 1:
 		print("Multiple event detections detected. Performing regular lossless compression.")
-	elif len(eventDetectionPaths == 0):
+	elif len(eventDetectionPaths) == 0:
 		# no eventdetection to align to, just do lossless compression
 		print("No event detection detected. Performing regular lossless decompression.")
 	else:
 		# index event detection
 		eventDetectionPath = eventDetectionPaths[0]
-		sampleRate = f["UniqueGlobalKey/channel_id"]["sampling_rate"]
+		sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
 		paths.remove(eventDetectionPath)
 		for path in paths:
 			if path.endswith("Events"):
 				# index back to event detection
 				dataset = f[path].value
-				start = int(round(sampleRate * dataset["start"][0]))
-				end = int(round(sampleRate * dataset["start"][-1] + 1)) # TODO: round properly
-				assert(end - start == dataset.shape[0]) # hopefully!
+				start = sampleRate * dataset["start"]
 				# otherwise, event by event
-				drop_fields(dataset, ["mean", "stdv", "start", "length"])
-				append_fields(dataset, ["start"], [range(start, end)], [getDtype(end)])
+				dataset = drop_fields(dataset, ["mean", "stdv", "start", "length"])
+				dataset = append_fields(dataset, ["start"], [start], [getDtype(start)])
 		# remove group hierarchy
 		f.create_group(__basegroup_name__)
 		for name, group in f.items():
 			if name != __basegroup_name__:
-				recursiveCollapseGroups(f, __basegroup_name__, name, object)
+				recursiveCollapseGroups(f, __basegroup_name__, name, group)
 	return losslessCompress(f, group)
 
 def deepLosslessDecompress(f, group):
+	# rebuild group hierarchy
+	if __basegroup_name__ in f.keys():
+		uncollapseGroups(f, f[__basegroup_name__])	
 	paths = findEvents(f, group)
 	eventDetectionPaths = [path for path in paths if "EventDetection" in path]
 	# TODO: what happens if there are multiple event detections? Is this even possible?
-	if len(eventDetectionPaths > 1):
+	if len(eventDetectionPaths) > 1:
 		print("Multiple event detections detected. Performing regular lossless decompression.")
-	elif len(eventDetectionPaths == 0):
+	elif len(eventDetectionPaths) == 0:
 		# no eventdetection to align to, just do lossless compression
 		print("No event detection detected. Performing regular lossless decompression.")
 	else:
@@ -97,9 +109,6 @@ def deepLosslessDecompress(f, group):
 					drop_fields(dataset, "start")
 					start = [i/sampleRate for i in eventData["start"]]
 					append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"]])	
-		# rebuild group hierarchy
-		if __basegroup_name__ in f.keys():
-			uncollapseGroups(f, f[__basegroup_name__])
 	return losslessDecompress(f, group)
 
 def losslessCompress(f, group):

@@ -20,8 +20,6 @@ from multiprocessing import Pool
 from parse_args import parseArgs, checkSure
 from util import recursiveFindFast5, log
 from compress import compressWrapper, chooseCompressFunc
-
-__basegroup_name__ = "Picopore"
 	
 def main():
 	args = parseArgs()
