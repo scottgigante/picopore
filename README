@@ -8,10 +8,30 @@ Options:
 - Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset (not yet implemented)
 - Minimal compression: reduces footprint by removing event detection and basecall data, leaving only raw signal (not yet implemented)
 
+## Installation ##
+
+The latest stable version of Picopore is available on PyPi. Install it using ```pip install picopore```. For the bleeding edge, clone and install from GitHub.
+```
+git clone https://www.github.com/scottgigante/picopore
+cd picopore
+python setup.py install
+```
+
+### Requirements ###
+
+Picopore requires ```h5repack``` from ```hdf5-tools```, which can be downloaded from <<<website>>> https://support.hdfgroup.org/downloads/index.html ?
+
+Picopore requires the following Python packages:
+* h5py
+* numpy
+* multiprocessing
+
+For live compression on a Nanopore run, it is recommended that you install ```npreader```.
+
 ## Usage ##
 
 ```
-usage: python picopore.py [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]
+usage: picopore [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]
 ```
 
 ```
@@ -31,6 +51,12 @@ optional arguments:
 It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. 
 
 Note that only ```lossless``` and ```deep-lossless``` are options for ```unshrink```.
+
+### Live Compression ###
+
+To reduce the size of files during a MinION run, use ```npreader``` as follows:
+
+```npreader -folder /path/to/reads | picopore {--lossless,--raw} shrink```
 
 ## Compression Modes ##
 

@@ -17,11 +17,14 @@
 
 from __future__ import print_function
 import h5py
-import sys
 import os
 from multiprocessing import Pool
 from argparse import ArgumentParser
 import subprocess
+from numpy.lib.recfunctions import drop_fields, append_fields
+import numpy as np
+
+__basegroup_name__ = "Picopore"
 
 def parseArgs(argv):
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
@@ -34,15 +37,44 @@ def parseArgs(argv):
 	parser.add_argument("input", nargs="*", help="List of directories or fast5 files to shrink")
 	return parser.parse_args()
 
+def isGroup(object):
+	return type(group).__name__ == "Group"
+	
+def getIntDtype(num):
+	if num < 2**4:
+		name='int4'
+	elif num < 2**8
+		name='int8'
+	elif num < 2**16:
+		name='int16'
+	elif num < 2**32:
+		name='int32'
+	else:
+		name='int64'
+	return np.dtype(name)
+	
+def getDtype(data):
+	if type(data).__name__ in ['list', 'numpy.ndarray']:
+		if type(data[0].__name__ == 'int'):
+			return getIntDtype(max(data))
+		elif type(data[0].__name__ == 'str'):
+			return '|S{}'.format(max([len(i) for i in data]) + 1)
+	if type(data).__name__ == 'int':
+		return getIntDtype(data)
+	elif type(data).__name__ == 'str':
+		return '|S{}'.format(len(data))
+	else:
+		# TODO: float?
+		return None
+
 def recursiveFindEvents(group):
 	eventPaths = []
-	if type(group).__name__ == "Group":
+	if isGroup(group):
 		for subgroup in group.values():
 			eventPaths.extend(recursiveFindEvents(subgroup))
 	elif group.name.endswith("Events") or group.name.endswith("Alignment"):
 		eventPaths.append(group.name)
 	return eventPaths
-	
 
 def findEvents(f, group_id):
 	eventPaths = []
@@ -59,6 +91,88 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1):
 	f.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
 	for name, value in attrs.items():
 		f[path].attrs[name] = value
+		
+def recursiveCollapseGroups(f, basegroup, path, group):
+	for subname, object in group:
+		subpath = "{}\/{}".format(path, subname)
+		if isGroup(object):
+			recursiveCollapseGroups(f, basegroup, subpath, object)
+		else:
+			f.move(object.name, "{}/{}".format(basename, subpath))
+		for k, v in group.attrs.items():
+			basegroup.attrs.create("{}\/{}".format(subpath, k), v, dtype=getMinDtype(v))
+
+def uncollapseGroups(f, basegroup):
+	for name, object in basegroup.items():
+		f.move(name, name.replace("\/", "/")) # TODO: does this include basegroup?
+	for k, v in basegroup.attrs.items():
+		k = k.split("\/")
+		groupname = "/".join(k[:-1])
+		attrname = k[-1]
+		f.create_group(groupname)
+		f[groupname].attrs.create(attrname, v, dtype=getMinDtype(v))
+
+def deepLosslessCompress(f, group):
+	paths = findEvents(f, group)
+	eventDetectionPaths = [path for path in paths if "EventDetection" in path]
+	# TODO: what happens if there are multiple event detections? Is this even possible?
+	if len(eventDetectionPaths > 1):
+		print("Multiple event detections detected. Performing regular lossless compression.")
+	elif len(eventDetectionPaths == 0):
+		# no eventdetection to align to, just do lossless compression
+		print("No event detection detected. Performing regular lossless decompression.")
+	else:
+		# index event detection
+		eventDetectionPath = eventDetectionPaths[0]
+		sampleRate = f["UniqueGlobalKey/channel_id"]["sampling_rate"]
+		paths.remove(eventDetectionPath)
+		for path in paths:
+			if path.endswith("Events"):
+				# index back to event detection
+				dataset = f[path].value
+				start = int(round(sampleRate * dataset["start"][0]))
+				end = int(round(sampleRate * dataset["start"][-1] + 1)) # TODO: round properly
+				assert(end - start == dataset.shape[0]) # hopefully!
+				# otherwise, event by event
+				drop_fields(dataset, ["mean", "stdv", "start", "length"])
+				append_fields(dataset, ["start"], [range(start, end)], [getDtype(end)])
+		# remove group hierarchy
+		f.create_group(__basegroup_name__)
+		for name, group in f.items():
+			if name != __basegroup_name__:
+				recursiveCollapseGroups(f, __basegroup_name__, name, object)
+	return losslessCompress(f, group)
+
+def deepLosslessDecompress(f, group):
+	paths = findEvents(f, group)
+	eventDetectionPaths = [path for path in paths if "EventDetection" in path]
+	# TODO: what happens if there are multiple event detections? Is this even possible?
+	if len(eventDetectionPaths > 1):
+		print("Multiple event detections detected. Performing regular lossless decompression.")
+	elif len(eventDetectionPaths == 0):
+		# no eventdetection to align to, just do lossless compression
+		print("No event detection detected. Performing regular lossless decompression.")
+	else:
+		eventDetectionPath = eventDetectionPaths[0]
+		sampleRate = f["UniqueGlobalKey/channel_id"]["sampling_rate"]
+		paths.remove(eventDetectionPath)
+		for path in paths:
+			if path.endswith("Events"):
+				# index back to event detection
+				dataset = f[path].value
+				if "mean" not in dataset.dtype.names:
+					start = dataset["start"][0]
+					end = dataset["start"][-1] + 1
+					assert(end - start == dataset.shape[0]) # hopefully!
+					# otherwise, event by event
+					eventData = f[eventDetectionPath].value[start:end]
+					drop_fields(dataset, "start")
+					start = [i/sampleRate for i in eventData["start"]]
+					append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"])	
+		# rebuild group hierarchy
+		if __basegroup_name__ in f.keys():
+			uncollapseGroups(f, f[__basegroup_name__])
+	return losslessDecompress(f, group)
 
 def losslessCompress(f, group):
 	for path in findEvents(f, group):
@@ -119,7 +233,7 @@ def checkSure():
 	else:
 		return 0
 	
-def run(argv):
+def main():
 	args = parseArgs(argv)
 	func = chooseShrinkFunc(args)
 	fileList = recursiveFindFast5(args.input)
@@ -136,4 +250,4 @@ def run(argv):
 		print("User cancelled. Exiting.")
 
 if __name__ == "__main__":
-	run(sys.argv)
+	main()
