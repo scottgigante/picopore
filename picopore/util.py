@@ -81,9 +81,9 @@ def findEvents(f, group_id):
 		pass
 	return eventPaths	
 	
-def rewriteDataset(f, path, compression="gzip", compression_opts=1):
+def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None):
 	attrs = f.get(path).attrs
-	dataset = f.get(path).value
+	dataset = f.get(path).value if dataset is None else dataset
 	del f[path]
 	f.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
 	for name, value in attrs.items():
@@ -96,13 +96,13 @@ def recursiveCollapseGroups(f, basegroup, path, group):
 			recursiveCollapseGroups(f, basegroup, subpath, object)
 		else:
 			f.move(object.name, "{}/{}".format(basegroup, subpath))
-		for k, v in group.attrs.items():
-			f[basegroup].attrs.create("{}.{}".format(subpath, k), v, dtype=getDtype(v))
+	for k, v in group.attrs.items():
+		f[basegroup].attrs.create("{}.{}".format(path, k), v, dtype=getDtype(v))
 	del f[group.name]
 
 def uncollapseGroups(f, basegroup):
 	for name, object in basegroup.items():
-		f.move(name, name.replace(".", "/")) # TODO: does this include basegroup?
+		f.move("{}/{}".format(basegroup.name, name), name.replace(".", "/")) # TODO: does this include basegroup?
 	for k, v in basegroup.attrs.items():
 		k = k.split(".")
 		groupname = "/".join(k[:-1])

@@ -73,6 +73,7 @@ def deepLosslessCompress(f, group):
 				# otherwise, event by event
 				dataset = drop_fields(dataset, ["mean", "stdv", "start", "length"])
 				dataset = append_fields(dataset, ["start"], [start], [getDtype(start)])
+				rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
 		# remove group hierarchy
 		f.create_group(__basegroup_name__)
 		for name, group in f.items():
