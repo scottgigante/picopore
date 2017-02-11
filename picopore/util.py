@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 
 def log(message, end='\n'):
-	print(message, end)
+	print(message, end=end)
 
 def recursiveFindFast5(input):
 	files = []
@@ -31,7 +31,7 @@ def recursiveFindFast5(input):
 	return files
 
 def isGroup(object):
-	return type(group).__name__ == "Group"
+	return type(object).__name__ == "Group"
 	
 def getIntDtype(num):
 	if num < 2**4:

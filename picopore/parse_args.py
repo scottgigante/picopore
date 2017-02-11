@@ -16,7 +16,6 @@
 """
 
 from argparse import ArgumentParser
-from util import log
 
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
@@ -28,25 +27,6 @@ def parseArgs():
 	parser.add_argument("-y", action="store_true", default=False, help="Skip confirm step")
 	parser.add_argument("input", nargs="*", help="List of directories or fast5 files to shrink")
 	return parser.parse_args()
-	
-def chooseShrinkFunc(args):
-	if args.command == "shrink":
-		if args.lossless:
-			func = losslessCompress
-			name = "Performing lossless compression "
-		elif args.raw:
-			func = rawCompress
-			name = "Reverting to raw signal "
-	else:
-		if args.lossless:
-			func = losslessDecompress
-			name = "Performing lossless decompression "
-	try:
-		log(name, end='')
-	except NameError:
-		log("No shrinking method selected")
-		exit()
-	return func
 	
 def checkSure():
 	response = raw_input("Are you sure? (yes|no): ")

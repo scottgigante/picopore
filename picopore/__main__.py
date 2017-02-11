@@ -15,23 +15,22 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import h5py
 from multiprocessing import Pool
 
-from parse_args import parseArgs, chooseShrinkFunc, checkSure
-from util import isGroup, getDtype, findEvents, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, recursiveFindFast5, log
-from compress import compressWrapper, rawCompress, losslessCompress, losslessDecompress, deepLosslessCompress, deepLosslessDecompress
+from parse_args import parseArgs, checkSure
+from util import recursiveFindFast5, log
+from compress import compressWrapper, chooseCompressFunc
 
 __basegroup_name__ = "Picopore"
 	
 def main():
 	args = parseArgs()
-	func = chooseShrinkFunc(args)
+	func = chooseCompressFunc(args)
 	fileList = recursiveFindFast5(args.input)
 	log("on {} files... ".format(len(fileList)))
 	if args.y or checkSure():
 		if args.threads <= 1:
-			[compress(func,f, args.group) for f in fileList]
+			[compressWrapper([func,f, args.group]) for f in fileList]
 		else:
 			argList = [[func, f, args.group] for f in fileList]
 			pool = Pool(args.threads)

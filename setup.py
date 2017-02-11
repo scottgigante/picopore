@@ -32,6 +32,6 @@ setup(
 		'Topic :: Scientific/Engineering :: Bio-Informatics'
 		],
   entry_points = {
-        'console_scripts': ['picopore = picopore.picopore:main'],
+        'console_scripts': ['picopore = picopore.__main__:main'],
     },
 )

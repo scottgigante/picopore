@@ -14,9 +14,31 @@
     You should have received a copy of the GNU General Public License
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
-from numpy.lib.recfunctions import drop_fields, append_fields
 import subprocess
 import numpy as np
+import h5py
+from numpy.lib.recfunctions import drop_fields, append_fields
+
+from util import log, isGroup, getDtype, findEvents, rewriteDataset, recursiveCollapseGroups, uncollapseGroups
+
+def chooseCompressFunc(args):
+	if args.command == "shrink":
+		if args.lossless:
+			func = losslessCompress
+			name = "Performing lossless compression "
+		elif args.raw:
+			func = rawCompress
+			name = "Reverting to raw signal "
+	else:
+		if args.lossless:
+			func = losslessDecompress
+			name = "Performing lossless decompression "
+	try:
+		log(name, end='')
+	except NameError:
+		log("No shrinking method selected")
+		exit()
+	return func
 
 def deepLosslessCompress(f, group):
 	paths = findEvents(f, group)
