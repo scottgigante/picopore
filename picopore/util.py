@@ -15,8 +15,8 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
 from __future__ import print_function
+import os
 
 def log(message, end='\n'):
 	print(message, end)
