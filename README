@@ -19,19 +19,17 @@ python setup.py install
 
 ### Requirements ###
 
-Picopore requires ```h5repack``` from ```hdf5-tools```, which can be downloaded from <<<website>>> https://support.hdfgroup.org/downloads/index.html ?
+Picopore requires ```h5repack``` from ```hdf5-tools```, which can be downloaded from https://support.hdfgroup.org/downloads/index.html or using ```sudo apt-get install hdf5-tools```
 
 Picopore requires the following Python packages:
 * h5py
-* numpy
-* multiprocessing
 
 For live compression on a Nanopore run, it is recommended that you install ```npreader```.
 
 ## Usage ##
 
 ```
-usage: picopore [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} [input]
+usage: picopore [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} /path/to/fast5
 ```
 
 ```

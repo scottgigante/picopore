@@ -60,26 +60,26 @@ def getDtype(data):
 		# TODO: float?
 		return None
 
-def recursiveFindEvents(group):
+def recursiveFindDatasets(group, keyword):
 	eventPaths = []
 	if isGroup(group):
 		for subgroup in group.values():
-			eventPaths.extend(recursiveFindEvents(subgroup))
-	elif group.name.endswith("Events") or group.name.endswith("Alignment"):
+			eventPaths.extend(recursiveFindDatasets(subgroup))
+	elif group.name.endswith(keyword):
 		eventPaths.append(group.name)
 	return eventPaths
 
-def findEvents(f, group_id):
+def findDatasets(f, group_id, keyword="Events", entry_point="Analyses"):
 	eventPaths = []
 	try:
-		analyses = f.get("Analyses")
+		analyses = f.get(entry_point)
 		for group in analyses.values():
 			if group_id == "all" or group.endswith(group_id):
-				eventPaths.extend(recursiveFindEvents(group))
+				eventPaths.extend(recursiveFindDatasets(group))
 	except AttributeError:
 		# no analyses, dont worry
 		pass
-	return eventPaths	
+	return eventPaths
 	
 def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None):
 	attrs = f.get(path).attrs
