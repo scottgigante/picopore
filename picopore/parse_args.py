@@ -16,10 +16,12 @@
 """
 
 from argparse import ArgumentParser
+from version import __version__
 
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")
 	parser.add_argument("command", choices=('shrink', 'unshrink'), help="Choose between shrinking and unshrinking files")
+	parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__))
 	parser.add_argument("-l", "--lossless", default=False, action="store_true", help="Shrinks files with no data loss")
 	parser.add_argument("--raw", default=False, action="store_true", help="Reverts files to raw signal data only")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads")
