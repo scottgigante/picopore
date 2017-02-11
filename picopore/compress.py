@@ -57,7 +57,7 @@ def deepLosslessCompress(f, group):
 	# index event detection
 	sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
 	for path in paths:
-		if f[path].parent.parent.attrs.__contains__["event_detection"]:
+		if f[path].parent.parent.attrs.__contains__("event_detection"):
 			# index back to event detection
 			dataset = f[path].value
 			start = sampleRate * dataset["start"]
@@ -86,8 +86,8 @@ def deepLosslessDecompress(f, group):
 			if "mean" not in dataset.dtype.names:
 				start = dataset["start"][0]
 				end = dataset["start"][-1] + 1
-				eventDetectionPath = f[path].parent.parent.attrs.get("event_detection"))[0]
-				eventData = f[findDatasets(f, "all", entry_point=eventDetectionPath]
+				eventDetectionPath = f[path].parent.parent.attrs.get("event_detection")
+				eventData = f[findDatasets(f, "all", entry_point=eventDetectionPath)[0]]
 				eventData = eventData[np.logical_and(eventData["start"] >= start,eventData["start"] < end)]
 				dataset = drop_fields(dataset, "start")
 				start = [i/sampleRate for i in eventData["start"]]
@@ -96,12 +96,18 @@ def deepLosslessDecompress(f, group):
 	return losslessDecompress(f, group)
 
 def losslessCompress(f, group):
-	for path in findDatasets(f, group):
+	paths = findDatasets(f, group, keyword="Events")
+	paths.extend(findDatasets(f, group, keyword="Alignment"))
+	paths.extend(findDatasets(f, "all", keyword="Signal", entry_point="Raw"))
+	for path in paths:
 		rewriteDataset(f, path, "gzip", 9)
 	return "GZIP=9"
 		
 def losslessDecompress(f, group):
-	for path in findDatasets(f, group):
+	paths = findDatasets(f, group, keyword="Events")
+	paths.extend(findDatasets(f, group, keyword="Alignment"))
+	paths.extend(findDatasets(f, "all", keyword="Signal", entry_point="Raw"))
+	for path in paths:
 		rewriteDataset(f, path)
 	return "GZIP=1"
 		

@@ -64,7 +64,7 @@ def recursiveFindDatasets(group, keyword):
 	eventPaths = []
 	if isGroup(group):
 		for subgroup in group.values():
-			eventPaths.extend(recursiveFindDatasets(subgroup))
+			eventPaths.extend(recursiveFindDatasets(subgroup, keyword))
 	elif group.name.endswith(keyword):
 		eventPaths.append(group.name)
 	return eventPaths
@@ -75,7 +75,7 @@ def findDatasets(f, group_id, keyword="Events", entry_point="Analyses"):
 		analyses = f.get(entry_point)
 		for group in analyses.values():
 			if group_id == "all" or group.endswith(group_id):
-				eventPaths.extend(recursiveFindDatasets(group))
+				eventPaths.extend(recursiveFindDatasets(group, keyword))
 	except AttributeError:
 		# no analyses, dont worry
 		pass
