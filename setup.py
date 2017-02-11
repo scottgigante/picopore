@@ -1,6 +1,15 @@
 import os
 from setuptools import setup
 
+version_py = os.path.join(os.path.dirname(__file__), 'picopore', 'version.py')
+version = open(version_py).read().strip().split('=')[-1].replace('"','').strip()
+print version
+
+HERE = os.path.dirname(__file__)
+
+with open(os.path.join(HERE, "requirements.txt"), "r") as f:
+    install_requires = [x.strip() for x in f.readlines()]
+
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
@@ -10,17 +19,27 @@ def read(fname):
 
 setup(
   name = 'picopore',
-  packages = ['picopore'], # this must be the same as the name above
-  version = '0.1.1',
+  packages = ['picopore'],
+  package_dir={'picopore': "picopore"},
+  version=version,
+  zip_safe=False,
+  include_package_data=True,
+  install_requires=install_requires,
+  requires=['python (>=2.7, <3.0)'],
   description = 'A tool for reducing the size of Oxford Nanopore Technologies\' datasets without losing information.',
   long_description=read('README'),
   author = 'Scott Gigante',
   author_email = 'scottgigante@gmail.com',
   url = 'https://github.com/scottgigante/picopore', # use the URL to the github repo
-  download_url = 'https://github.com/scottgigante/picopore/tarball/0.1.0', 
   keywords = ['nanopore', 'compression', 'hdf5', 'fast5', 'oxford', 'minion'], # arbitrary keywords
-  classifiers = ["Development Status :: 3 - Alpha"],
+  classifiers = [
+		"Development Status :: 3 - Alpha",
+		'Intended Audience :: Science/Research',
+		'License :: OSI Approved :: GNU General Public License (GPL)',
+		'Topic :: Scientific/Engineering :: Bio-Informatics'
+		],
   entry_points = {
-        'console_scripts': ['picopore=picopore.picopore:main'],
+        'console_scripts': ['picopore = picopore.picopore:main'],
+		
     },
 )

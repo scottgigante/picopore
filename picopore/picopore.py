@@ -43,7 +43,7 @@ def isGroup(object):
 def getIntDtype(num):
 	if num < 2**4:
 		name='int4'
-	elif num < 2**8
+	elif num < 2**8:
 		name='int8'
 	elif num < 2**16:
 		name='int16'
@@ -168,7 +168,7 @@ def deepLosslessDecompress(f, group):
 					eventData = f[eventDetectionPath].value[start:end]
 					drop_fields(dataset, "start")
 					start = [i/sampleRate for i in eventData["start"]]
-					append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"])	
+					append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], eventData["length"]])	
 		# rebuild group hierarchy
 		if __basegroup_name__ in f.keys():
 			uncollapseGroups(f, f[__basegroup_name__])
