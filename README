@@ -1,4 +1,4 @@
-# Picopore v 0.2.0 #
+# Picopore v 0.2.1 #
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
@@ -29,11 +29,10 @@ For live compression on a Nanopore run, it is recommended that you install ```np
 ## Usage ##
 
 ```
-usage: picopore [-h] [-v] [-y] [--revert] [-t THREADS] [-g GROUP]
-                [--prefix PREFIX] [--test]
+usage: picopore [-h] [-v] [-y] [--revert] [--realtime | --test]
+                [--prefix PREFIX] [-t THREADS] [-g GROUP]
                 {lossless,deep-lossless,raw} [input [input ...]]
 ```
-
 ```
 positional arguments:
   {lossless,deep-lossless,raw}
@@ -45,28 +44,22 @@ optional arguments:
   -v, --version         show version number and exit
   -y                    skip confirm step
   --revert              reverts files to original size (lossless modes only)
+  --realtime            monitor a directory for new reads and compress them in
+                        real time
+  --test                compress to a temporary file and check that all
+                        datasets and attributes are equal (note: does not work
+                        on pre-compressed files)
+  --prefix PREFIX       add prefix to output files to prevent overwrite
   -t THREADS, --threads THREADS
                         number of threads (default: 1)
   -g GROUP, --group GROUP
                         group number allows discrimination between different
                         basecalling runs (default: all)
-  --prefix PREFIX       add prefix to output files to prevent overwrite
-  --test                compress to a temporary file and check that all
-                        datasets and attributes are equal (note: does not work
-                        on pre-compressed files)
 ```
 
 It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. 
 
 Note that only ```lossless``` and ```deep-lossless``` are options for ```--revert``.
-
-### Live Compression ###
-
-To reduce the size of files during a MinION run, use npReader as follows:
-
-```jsa.np.npreader -folder /path/to/reads -output - | picopore [options]```
-
-You can download npReader at https://github.com/mdcao/npReader/
 
 ## Compression Modes ##
 
@@ -74,10 +67,10 @@ Picopore compression allows most nanopore tools to operate unimpeded. We provide
 
 | Functionality        | Lossless |      Deep Lossless      | Raw | Minimal |
 |:--------------------:|:--------:|:-----------------------:|:---:|:-------:|
-| Metrichor            |    ✓     | ```picopore --revert``` |  ✓  |    ✓    | 
-| nanonetcall          |    ✓     | ```picopore --revert``` |  ✓  |    ✓    | 
-| poretools fastq      |    ✓     | ```picopore --revert``` |  ✓  | ```nanonetcall \ Metrichor``` | 
-| nanopolish consensus |    ✓     | ```picopore --revert``` |  ```nanonetcall \ Metrichor```  | ```nanonetcall \ Metrichor``` | 
+| Metrichor            |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
+| nanonetcall          |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
+| poretools fastq      |     ✓       | ```picopore --revert``` |  ✓  | ```nanonetcall \ Metrichor``` | 
+| nanopolish consensus |     ✓       | ```picopore --revert``` |  ```nanonetcall \ Metrichor```  | ```nanonetcall \ Metrichor``` | 
 
 
 ## FAQs ##
