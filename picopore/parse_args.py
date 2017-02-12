@@ -16,7 +16,10 @@
 """
 
 from argparse import ArgumentParser, ArgumentError
-from utils import log
+import os
+
+from version import __version__
+from util import log
 
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
@@ -35,6 +38,8 @@ def parseArgs():
 		if "lossless" not in args.mode:
 			raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
 		args.prefix = "picopore.test"
+	
+	args.input = [os.path.abspath(i) for i in args.input]
 	
 	return args
 	

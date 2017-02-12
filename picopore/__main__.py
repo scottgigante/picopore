@@ -16,46 +16,56 @@
 """
 
 from multiprocessing import Pool
+import os
 
 from parse_args import parseArgs, checkSure
 from util import recursiveFindFast5, log, getPrefixedFilename
 from compress import compressWrapper, chooseCompressFunc
 from test import checkEquivalent
-from os import remove
 
 def run(revert, mode, input, y, threads, group, prefix):
 	func = chooseCompressFunc(revert, mode)
 	fileList = recursiveFindFast5(input)
+	preSize = sum([os.stat(f).st_size for f in fileList])
 	log("on {} files... ".format(len(fileList)))
-	if args.y or checkSure():
-		if args.threads <= 1:
+	if y or checkSure():
+		if threads <= 1:
 			for f in fileList:
 				compressWrapper([func,f, group, prefix])
 		else:
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
+		postSize = sum([os.stat(getPrefixedFilename(f, prefix)).st_size for f in fileList])
+		if revert:
+			preStr, postStr = "Compressed", "Raw"
+		else:
+			preStr, postStr = "Raw", "Compressed"
 		log("Complete.")
+		log("{} size: {}".format(preStr, preSize))
+		log("{} size: {}".format(postStr, postSize))
 		return 0
 	else:
 		log("User cancelled. Exiting.")
-		return 1
+		exit(1)
+		
+def runTest(args):
+	fileList = recursiveFindFast5(args.input)
+	run(False, args.mode, args.input, True, args.threads, args.group, args.prefix)
+	run(True, args.mode, [getPrefixedFilename(i, args.prefix) for i in args.input], True, args.threads, args.group, None)
+	for f in fileList:
+		compressedFile = getPrefixedFilename(f, args.prefix)
+		checkEquivalent(f, compressedFile)
+		os.remove(compressedFile)
+	return 0
 	
 def main():
 	args = parseArgs()
 	if args.test:
-		result = 0
-		fileList = recursiveFindFast5(input)
-		run(False, args.mode, args.input, True, args.threads, args.group, args.prefix)
-		run(True, args.mode, os.path.join(args.input, args.prefix), True, args.threads, args.group, None)
-		for f in fileList:
-			compressedFile = getPrefixedFilename(f)
-			if not checkEquivalent(f, compressedFile):
-				result = 1
-			remove(compressedFile)
+		runTest(args)
 	else:
-		result = run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
-	return result
+		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
+	return 0
 
 if __name__ == "__main__":
 	exit(main())
