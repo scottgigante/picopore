@@ -34,7 +34,7 @@ def recursiveFindFast5(inp):
 	files = []
 	for path in inp:
 		if os.path.isdir(path):
-			files.extend(recursiveFindFast5(os.listdir(path)))
+			files.extend(recursiveFindFast5([os.path.join(path, i) for i in os.listdir(path)]))
 		elif os.path.isfile(path) and path.endswith(".fast5"):
 			files.append(path)
 		else:

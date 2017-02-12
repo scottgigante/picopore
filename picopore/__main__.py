@@ -17,20 +17,20 @@
 
 from multiprocessing import Pool
 import os
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from time import sleep
 
 from parse_args import parseArgs, checkSure
 from util import recursiveFindFast5, log, getPrefixedFilename
 from compress import compressWrapper, chooseCompressFunc
 from test import checkEquivalent
-from realtime import ReadsFolder
 
-def run(revert, mode, input, y, threads, group, prefix):
-	func = chooseCompressFunc(revert, mode)
-	fileList = recursiveFindFast5(input)
+def run(revert, mode, inp, y, threads, group, prefix):
+	func, message = chooseCompressFunc(revert, mode)
+	fileList = recursiveFindFast5(inp)
+	if len(fileList) == 0:
+		return 0
 	preSize = sum([os.stat(f).st_size for f in fileList])
-	log("on {} files... ".format(len(fileList)))
+	log("{} on {} files... ".format(message, len(fileList)))
 	if y or checkSure():
 		if threads <= 1:
 			for f in fileList:
@@ -63,13 +63,14 @@ def runTest(args):
 	return 0
 
 def runRealtime(args):
+	from realtime import ReadsFolder
 	readsFolder = ReadsFolder(args)
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        log("Exiting Picopore.")
-    readsFolder.stop()
+	try:
+		while True:
+			sleep(1)
+	except KeyboardInterrupt:
+		log("Exiting Picopore.")
+	readsFolder.stop()
 	
 def main():
 	args = parseArgs()

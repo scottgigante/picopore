@@ -29,7 +29,7 @@ def checkTestMode(test, args):
 	return args.test
 
 def checkInputs(args):
-	argsDirs.input = [os.path.abspath(i) for i in args.input]
+	args.input = [os.path.abspath(i) for i in args.input]
 	# we go recursively - better remove duplicates
 	keepDirs = []
 	for i in range(len(args.input)):
@@ -44,10 +44,13 @@ def checkInputs(args):
 def checkRealtime(args):
 	if args.realtime:
 		log("Performing real time {} compression. ".format(args.mode),end='')
-		if checkSure():
+		if args.y:
+			print('')
+			return True
+		elif checkSure():
 			args.y = True
 			return True
-		else
+		else:
 			return False
 
 def parseArgs():
@@ -58,7 +61,7 @@ def parseArgs():
 	mut_excl = parser.add_mutually_exclusive_group(required=True)
 	mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
 	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
-	mut_excl.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
+	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
 	parser.add_argument("mode", choices=('lossless', 'deep-lossless', 'raw'), default='deep-lossless', help="choose compression mode (default: deep-lossless)")

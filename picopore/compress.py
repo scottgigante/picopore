@@ -29,50 +29,50 @@ def chooseCompressFunc(revert, mode):
 	if revert:
 		if mode == 'lossless':
 			func = losslessDecompress
-			name = "Performing lossless decompression "
+			name = "Performing lossless decompression"
 		elif mode == 'deep-lossless':
 			func = deepLosslessDecompress
-			name = "Performing deep lossless decompression "
+			name = "Performing deep lossless decompression"
 		else:
 			log("Unable to revert raw files. Please use a basecaller instead.")
 			exit(1)
 	else:
 		if mode == 'lossless':
 			func = losslessCompress
-			name = "Performing lossless compression "
+			name = "Performing lossless compression"
 		elif mode == 'deep-lossless':
 			func = deepLosslessCompress
-			name = "Performing deep lossless compression "
+			name = "Performing deep lossless compression"
 		elif mode == 'raw':
 			func = rawCompress
-			name = "Performing raw compression "
+			name = "Performing raw compression"
 	try:
-		log(name, end='')
+		return func, name
 	except NameError:
-		log("No shrinking method selected")
+		log("No compression method selected")
 		exit(1)
-	return func
 
 def deepLosslessCompress(f, group):
 	paths = findDatasets(f, group, "Events")
 	paths = [path for path in paths if "Basecall" in path]
 	# index event detection
-	sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
-	for path in paths:
-		if f[path].parent.parent.attrs.__contains__("event_detection"):
-			# index back to event detection
-			dataset = f[path].value
-			start = [int(round(sampleRate * i)) for i in dataset["start"]]
-			move = dataset["move"]
-			# otherwise, event by event
-			dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
-			dataset = append_fields(dataset, ["start", "move"], [start, move], [getDtype(start), getDtype(move)])
-			rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
-	# remove group hierarchy
-	f.create_group(__basegroup_name__)
-	for name, group in f.items():
-		if name != __basegroup_name__:
-			recursiveCollapseGroups(f, __basegroup_name__, name, group)
+	if "UniqueGlobalKey/channel_id" in f:
+		sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
+		for path in paths:
+			if f[path].parent.parent.attrs.__contains__("event_detection"):
+				# index back to event detection
+				dataset = f[path].value
+				start = [int(round(sampleRate * i)) for i in dataset["start"]]
+				move = dataset["move"]
+				# otherwise, event by event
+				dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
+				dataset = append_fields(dataset, ["start", "move"], [start, move], [getDtype(start), getDtype(move)])
+				rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
+	if __basegroup_name__ not in f:
+		f.create_group(__basegroup_name__)
+		for name, group in f.items():
+			if name != __basegroup_name__:
+				recursiveCollapseGroups(f, __basegroup_name__, name, group)
 	return losslessCompress(f, group)
 
 def deepLosslessDecompress(f, group):
