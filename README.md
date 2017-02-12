@@ -23,8 +23,7 @@ Picopore requires ```h5repack``` from ```hdf5-tools```, which can be downloaded 
 
 Picopore requires the following Python packages:
 * h5py
-
-For live compression on a Nanopore run, it is recommended that you install ```npreader```.
+* watchdog (for real-time compression)
 
 ## Usage ##
 
