@@ -41,6 +41,15 @@ def checkInputs(args):
 			keepDirs.append(args.input[i])
 	return keepDirs
 
+def checkRealtime(args):
+	if args.realtime:
+		log("Performing real time {} compression. ".format(args.mode),end='')
+		if checkSure():
+			args.y = True
+			return True
+		else
+			return False
+
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
