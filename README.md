@@ -16,6 +16,7 @@ git clone https://www.github.com/scottgigante/picopore
 cd picopore
 python setup.py install
 ```
+Currently, ```h5py``` is only available on Windows via ```conda```. Picopore will be uploaded to ```conda``` in the near future.
 
 ### Requirements ###
 
