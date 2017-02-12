@@ -58,7 +58,7 @@ def parseArgs():
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
 	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
-	mut_excl = parser.add_mutually_exclusive_group(required=True)
+	mut_excl = parser.add_mutually_exclusive_group()
 	mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
 	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
 	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
