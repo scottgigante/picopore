@@ -18,26 +18,44 @@
 from multiprocessing import Pool
 
 from parse_args import parseArgs, checkSure
-from util import recursiveFindFast5, log
+from util import recursiveFindFast5, log, getPrefixedFilename
 from compress import compressWrapper, chooseCompressFunc
-	
-def main():
-	args = parseArgs()
-	func = chooseCompressFunc(args)
-	fileList = recursiveFindFast5(args.input)
+from test import checkEquivalent
+from os import remove
+
+def run(revert, mode, input, y, threads, group, prefix):
+	func = chooseCompressFunc(revert, mode)
+	fileList = recursiveFindFast5(input)
 	log("on {} files... ".format(len(fileList)))
 	if args.y or checkSure():
 		if args.threads <= 1:
-			[compressWrapper([func,f, args.group, args.prefix]) for f in fileList]
+			for f in fileList:
+				compressWrapper([func,f, group, prefix])
 		else:
-			argList = [[func, f, args.group, args.prefix] for f in fileList]
-			pool = Pool(args.threads)
+			argList = [[func, f, group, prefix] for f in fileList]
+			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
 		log("Complete.")
 		return 0
 	else:
 		log("User cancelled. Exiting.")
 		return 1
+	
+def main():
+	args = parseArgs()
+	if args.test:
+		result = 0
+		fileList = recursiveFindFast5(input)
+		run(False, args.mode, args.input, True, args.threads, args.group, args.prefix)
+		run(True, args.mode, os.path.join(args.input, args.prefix), True, args.threads, args.group, None)
+		for f in fileList:
+			compressedFile = getPrefixedFilename(f)
+			if not checkEquivalent(f, compressedFile):
+				result = 1
+			remove(compressedFile)
+	else:
+		result = run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
+	return result
 
 if __name__ == "__main__":
 	exit(main())

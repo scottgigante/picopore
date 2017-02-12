@@ -21,29 +21,29 @@ import os
 from numpy.lib.recfunctions import drop_fields, append_fields
 from shutil import copyfile
 
-from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups
+from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
 
-def chooseCompressFunc(args):
-	if args.revert:
-		if args.mode == 'lossless':
+def chooseCompressFunc(revert, mode):
+	if revert:
+		if mode == 'lossless':
 			func = losslessDecompress
 			name = "Performing lossless decompression "
-		elif 'deep-lossless':
+		elif mode == 'deep-lossless':
 			func = deepLosslessDecompress
 			name = "Performing deep lossless decompression "
 		else:
 			log("Unable to revert raw files. Please use a basecaller instead.")
 			exit(1)
 	else:
-		if args.mode == 'lossless':
+		if mode == 'lossless':
 			func = losslessCompress
 			name = "Performing lossless compression "
-		elif args.mode == 'deep-lossless':
+		elif mode == 'deep-lossless':
 			func = deepLosslessCompress
 			name = "Performing deep lossless compression "
-		elif args.mode == 'raw':
+		elif mode == 'raw':
 			func = rawCompress
 			name = "Performing raw compression "
 	try:
@@ -144,10 +144,11 @@ def rawCompress(f, group):
 
 def compress(func, filename, group="all", prefix=None):
 	if prefix is not None:
-		newFilename = os.path.join(os.path.dirname(filename), ".".join([prefix, os.path.basename(filename)]))
+		newFilename = getPrefixedFilename(filename, prefix)
 		copyfile(filename, newFilename)
-		filename = newFilename
-	with h5py.File(filename, 'r+') as f:
+	else:
+		newFilename = filename
+	with h5py.File(newFilename, 'r+') as f:
 		filtr = func(f, group)
 	subprocess.call(["h5repack","-f",filtr,filename,"{}.tmp".format(filename)])
 	subprocess.Popen(["mv","{}.tmp".format(filename),filename])

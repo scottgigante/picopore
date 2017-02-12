@@ -15,8 +15,8 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from argparse import ArgumentParser
-from version import __version__
+from argparse import ArgumentParser, ArgumentError
+from utils import log
 
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
@@ -26,9 +26,17 @@ def parseArgs():
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
 	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
+	test = parser.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
 	parser.add_argument("mode", choices=('lossless', 'deep-lossless', 'raw'), default='deep-lossless', help="choose compression mode (default: deep-lossless)")
 	parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
-	return parser.parse_args()
+	args = parser.parse_args()
+	
+	if args.test:
+		if "lossless" not in args.mode:
+			raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
+		args.prefix = "picopore.test"
+	
+	return args
 	
 def checkSure():
 	response = raw_input("Are you sure? (yes|no): ")

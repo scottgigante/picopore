@@ -21,6 +21,12 @@ import numpy as np
 
 def log(message, end='\n'):
 	print(message, end=end)
+	
+def getPrefixedFilename(filename, prefix=""):
+	if os.path.isdir(filename):
+		return os.path.join(filename, prefix)
+	else:
+		return os.path.join(os.path.dirname(filename), ".".join([prefix, os.path.basename(filename)]))
 
 def recursiveFindFast5(input):
 	files = []
@@ -29,6 +35,10 @@ def recursiveFindFast5(input):
 			files.extend(recursiveFindFast5(os.listdir(path)))
 		elif os.path.isfile(path) and path.endswith(".fast5"):
 			files.append(path)
+		else:
+			dirname = os.path.dirname(path)
+			prefix = os.path.basename(path)
+			files.extend([p for p in recursiveFindFast5(os.listdir(dirname)) if prefix in os.path.basename(p)])
 	return files
 
 def isType(obj, types):
