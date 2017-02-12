@@ -34,27 +34,42 @@ def recursiveFindFast5(input):
 def isGroup(object):
 	return type(object).__name__ == "Group"
 	
-def getIntDtype(num):
-	if num < 2**4:
-		name='int4'
-	elif num < 2**8:
-		name='int8'
+def getUIntDtype(num):
+	if num < 2**8:
+		name='uint8'
 	elif num < 2**16:
-		name='int16'
+		name='uint16'
 	elif num < 2**32:
+		name='uint32'
+	else:
+		name='uint64'
+	return np.dtype(name)
+
+def getIntDtype(num):
+	if abs(num) < 2**7:
+		name='int8'
+	elif abs(num) < 2**15:
+		name='int16'
+	elif abs(num) < 2**31:
 		name='int32'
 	else:
 		name='int64'
 	return np.dtype(name)
 	
 def getDtype(data):
-	if type(data).__name__ in ['list', 'numpy.ndarray']:
-		if type(data[0]).__name__ == 'int':
-			return getIntDtype(max(data))
+	if type(data).__name__ in ['list', 'ndarray']:
+		if type(data[0]).__name__ in ['int', 'int4', 'int8', 'int16', 'int32', 'int64']:
+			if min(data) > 0:
+				return getUIntDtype(max(data))
+			else:
+				return getIntDtype(max(data))
 		elif type(data[0]).__name__ == 'str':
 			return '|S{}'.format(max([len(i) for i in data]) + 1)
-	if type(data).__name__ == 'int':
-		return getIntDtype(data)
+	if type(data).__name__ in ['int', 'int4', 'int8', 'int16', 'int32', 'int64']:
+		if data > 0:
+			return getUIntDtype(data)
+		else:
+			return getIntDtype(data)
 	elif type(data).__name__ == 'str':
 		return '|S{}'.format(len(data))
 	else:
