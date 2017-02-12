@@ -68,8 +68,8 @@ Picopore compression allows most nanopore tools to operate unimpeded. We provide
 |:--------------------:|:--------:|:-----------------------:|:---:|:-------:|
 | Metrichor            |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
 | nanonetcall          |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
-| poretools fastq      |     ✓       | ```picopore --revert``` |  ✓  | ```nanonetcall \ Metrichor``` | 
-| nanopolish consensus |     ✓       | ```picopore --revert``` |  ```nanonetcall \ Metrichor```  | ```nanonetcall \ Metrichor``` | 
+| poretools fastq      |     ✓       | ```picopore --revert``` |  ✓  | ```nanonetcall / Metrichor``` | 
+| nanopolish consensus |     ✓       | ```picopore --revert``` |  ```nanonetcall / Metrichor```  | ```nanonetcall / Metrichor``` | 
 
 
 ## FAQs ##
