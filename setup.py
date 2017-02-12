@@ -20,7 +20,7 @@ setup(
   install_requires=['h5py>2.2.0','watchdog'],
   requires=['python (>=2.7, <3.0)'],
   description = 'A tool for reducing the size of Oxford Nanopore Technologies\' datasets without losing information.',
-  long_description=read('README'),
+  long_description=read('README.md'),
   author = 'Scott Gigante',
   author_email = 'scottgigante@gmail.com',
   url = 'https://github.com/scottgigante/picopore', # use the URL to the github repo
