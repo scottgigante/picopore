@@ -29,21 +29,28 @@ For live compression on a Nanopore run, it is recommended that you install ```np
 ## Usage ##
 
 ```
-usage: picopore [-h] [--lossless] [--raw] [-t THREADS] [-g GROUP] [-y] {shrink, unshrink} /path/to/fast5
+usage: picopore [-h] [-v] [-y] [--revert] [-t THREADS] [-g GROUP]
+                [--prefix PREFIX]
+                {lossless,deep-lossless,raw} [input [input ...]]
 ```
 
 ```
 positional arguments:
-  {shrink,unshrink}	choose between shrinking and unshrinking files
-  input				list of directories or fast5 files to shrink
+  {lossless,deep-lossless,raw}
+                        choose compression mode (default: deep-lossless)
+  input                 list of directories or fast5 files to shrink
 
 optional arguments:
-  --help			show this help message and exit
-  --lossless		shrinks files with no data loss
-  --raw				reverts files to raw signal data only
-  --threads THREADS	number of threads
-  --group GROUP		group number allows discrimination between different basecalling runs (default: all)
-  -y				skip confirmation step
+  -h, --help            show this help message and exit
+  -v, --version         show version number and exit
+  -y                    skip confirm step
+  --revert              reverts files to original size (lossless modes only)
+  -t THREADS, --threads THREADS
+                        number of threads (default: 1)
+  -g GROUP, --group GROUP
+                        group number allows discrimination between different
+                        basecalling runs (default: all)
+  --prefix PREFIX       add prefix to output files to prevent overwrite
 ```
 
 It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. 
