@@ -26,6 +26,7 @@ def parseArgs():
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
+	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
 	parser.add_argument("mode", choices=('lossless', 'deep-lossless', 'raw'), default='deep-lossless', help="choose compression mode (default: deep-lossless)")
 	parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
 	return parser.parse_args()

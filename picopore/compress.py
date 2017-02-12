@@ -18,6 +18,7 @@ import subprocess
 import numpy as np
 import h5py
 from numpy.lib.recfunctions import drop_fields, append_fields
+from shutil import copyfile
 
 from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups
 
@@ -127,7 +128,11 @@ def rawCompress(f, group):
 		del f[path]
 	return "GZIP=9"
 
-def compress(func, filename, group):
+def compress(func, filename, group="all", prefix=None):
+	if prefix is not None:
+		newFilename = os.path.join(os.path.dirname(filename), prefix + os.path.basename(filename))
+		copyfile(filename, newFilename)
+		filename = newFilename
 	with h5py.File(filename, 'r+') as f:
 		filtr = func(f, group)
 	subprocess.call(["h5repack","-f",filtr,filename,"{}.tmp".format(filename)])

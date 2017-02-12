@@ -30,7 +30,7 @@ def main():
 		if args.threads <= 1:
 			[compressWrapper([func,f, args.group]) for f in fileList]
 		else:
-			argList = [[func, f, args.group] for f in fileList]
+			argList = [[func, f, args.group, args.prefix] for f in fileList]
 			pool = Pool(args.threads)
 			pool.map(compressWrapper, argList)
 		log("Complete.")
