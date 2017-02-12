@@ -19,8 +19,8 @@ from argparse import ArgumentParser
 from version import __version__
 
 def parseArgs():
-	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", usage='''picopore [-h] [-v] [-y] [-l] [--raw] [-t THREADS] [-g GROUP]
-	{shrink,unshrink} /path/to/fast5''')
+	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data")#, usage='''picopore [-h] [-v] [-y] [-l] [--raw] [-t THREADS] [-g GROUP]
+#	{shrink,unshrink} /path/to/fast5''')
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__))
 	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")

@@ -17,6 +17,7 @@
 import subprocess
 import numpy as np
 import h5py
+import os
 from numpy.lib.recfunctions import drop_fields, append_fields
 from shutil import copyfile
 
@@ -26,23 +27,23 @@ __basegroup_name__ = "Picopore"
 
 def chooseCompressFunc(args):
 	if args.revert:
-		if 'lossless'.startswith(args.mode):
+		if args.mode == 'lossless':
 			func = losslessDecompress
 			name = "Performing lossless decompression "
-		elif 'deep-lossless'.startswith(args.mode):
+		elif 'deep-lossless':
 			func = deepLosslessDecompress
 			name = "Performing deep lossless decompression "
 		else:
 			log("Unable to revert raw files. Please use a basecaller instead.")
 			exit(1)
 	else:
-		if 'lossless'.startswith(args.mode):
+		if args.mode == 'lossless':
 			func = losslessCompress
 			name = "Performing lossless compression "
-		elif 'deep-lossless'.startswith(args.mode):
+		elif args.mode == 'deep-lossless':
 			func = deepLosslessCompress
 			name = "Performing deep lossless compression "
-		elif args.raw:
+		elif args.mode == 'raw':
 			func = rawCompress
 			name = "Performing raw compression "
 	try:
@@ -124,13 +125,25 @@ def losslessDecompress(f, group):
 	return "GZIP=1"
 		
 def rawCompress(f, group):
-	for path in findDatasets(f, group):
-		del f[path]
+	paths = findDatasets(f, group, keyword="Events")
+	paths.extend(findDatasets(f, group, keyword="Alignment"))
+	paths.extend(findDatasets(f, group, keyword="Log"))
+	paths.extend(findDatasets(f, group, keyword="Configuration"))
+	paths.extend(findDatasets(f, group, keyword="HairpinAlign"))
+	paths.extend(findDatasets(f, group, keyword="Summary")) # TODO: does poretools use summary?
+	paths.extend(findDatasets(f, group, keyword="Calibration_Strand"))
+	paths.extend(findDatasets(f, group, keyword="Hairpin_Split"))
+	for path in paths:
+		try:
+			del f[path]
+		except KeyError:
+			# duplicated in paths, already deleted
+			pass
 	return "GZIP=9"
 
 def compress(func, filename, group="all", prefix=None):
 	if prefix is not None:
-		newFilename = os.path.join(os.path.dirname(filename), prefix + os.path.basename(filename))
+		newFilename = os.path.join(os.path.dirname(filename), ".".join([prefix, os.path.basename(filename)]))
 		copyfile(filename, newFilename)
 		filename = newFilename
 	with h5py.File(filename, 'r+') as f:

@@ -108,7 +108,7 @@ def recursiveFindDatasets(group, keyword):
 	if isGroup(group):
 		for subgroup in group.values():
 			eventPaths.extend(recursiveFindDatasets(subgroup, keyword))
-	elif group.name.endswith(keyword):
+	if keyword in group.name:
 		eventPaths.append(group.name)
 	return eventPaths
 

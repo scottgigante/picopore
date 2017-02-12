@@ -28,7 +28,7 @@ def main():
 	log("on {} files... ".format(len(fileList)))
 	if args.y or checkSure():
 		if args.threads <= 1:
-			[compressWrapper([func,f, args.group]) for f in fileList]
+			[compressWrapper([func,f, args.group, args.prefix]) for f in fileList]
 		else:
 			argList = [[func, f, args.group, args.prefix] for f in fileList]
 			pool = Pool(args.threads)
