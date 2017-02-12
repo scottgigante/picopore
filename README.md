@@ -84,16 +84,20 @@ Picopore solves this problem. Without removing the raw signal or configuration d
 
 ### Do I lose functionality when using Picopore? ###
 
+#### Lossless ###
 Lossless compression uses HDF5's builtin compression, so all existing fast5 tools will work seamlessly. 
 - Use case: power users who wish to reduce server storage footprint
 
+#### Deep Lossless ####
 Deep lossless compression modifies the structure of your fast5 file: any data extraction tools will not work until you run ```python picopore.py --revert deep-lossless [input]```.
 - Use case: power users who wish to reduce the size of their files during data transfer, or for long-term storage
 
+#### Raw ####
 Raw compression removes the "squiggle-space" data. For most users, this data is not critical; the only tools we know of which use the squiggle-space data are ```nanopolish```, ```nanoraw``` and ```nanonettrain```. If you do not intend on using these tools, your tools will work as before. If you do intend to use these tools, the raw signal is retained, and you can resubmit the files for basecalling to generate new squiggle-space data.
 - Use case: end users who are only interested in using the FASTQ data
 - Use case: power users running local basecalling with limited local disk space, who wish to use FASTQ immediately and will submit reads to Metrichor at a later date
 
+#### Minimal ####
 Minimal compression removes all data not required to rerun basecalling on the fast5 files. This is only recommended for long-term storage, and requires files to be re-basecalled for any data to be retrieved.
 - Use case: users storing historical runs for archive purposes, with no short-term plans to use these reads
 
