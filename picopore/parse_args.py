@@ -21,25 +21,44 @@ import os
 from version import __version__
 from util import log
 
+def checkTestMode(test, args):
+	if args.test:
+		if "lossless" not in args.mode:
+			raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
+		args.prefix = "picopore.test"
+	return args.test
+
+def checkInputs(args):
+	argsDirs.input = [os.path.abspath(i) for i in args.input]
+	# we go recursively - better remove duplicates
+	keepDirs = []
+	for i in range(len(args.input)):
+		subDir = False
+		for j in range(len(args.input)):
+			if args.input[j] in args.input[i] and i != j:
+				subDir = True
+		if not subDir:
+			keepDirs.append(args.input[i])
+	return keepDirs
+
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
 	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
+	mut_excl = parser.add_mutually_exclusive_group(required=True)
+	mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
+	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
+	mut_excl.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
-	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
-	test = parser.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
 	parser.add_argument("mode", choices=('lossless', 'deep-lossless', 'raw'), default='deep-lossless', help="choose compression mode (default: deep-lossless)")
 	parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
 	args = parser.parse_args()
 	
-	if args.test:
-		if "lossless" not in args.mode:
-			raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
-		args.prefix = "picopore.test"
-	
-	args.input = [os.path.abspath(i) for i in args.input]
+	args.test = checkTestMode(test, args)
+	args.input = checkInputs(args)
+	args.realtime = checkRealtime(args)
 	
 	return args
 	

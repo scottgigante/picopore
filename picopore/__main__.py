@@ -17,11 +17,14 @@
 
 from multiprocessing import Pool
 import os
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 from parse_args import parseArgs, checkSure
 from util import recursiveFindFast5, log, getPrefixedFilename
 from compress import compressWrapper, chooseCompressFunc
 from test import checkEquivalent
+from realtime import ReadsFolder
 
 def run(revert, mode, input, y, threads, group, prefix):
 	func = chooseCompressFunc(revert, mode)
@@ -58,11 +61,22 @@ def runTest(args):
 		checkEquivalent(f, compressedFile)
 		os.remove(compressedFile)
 	return 0
+
+def runRealtime(args):
+	readsFolder = ReadsFolder(args)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        log("Exiting Picopore.")
+    readsFolder.stop()
 	
 def main():
 	args = parseArgs()
 	if args.test:
 		runTest(args)
+	elif args.realtime:
+		runRealtime(args)
 	else:
 		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
 	return 0
