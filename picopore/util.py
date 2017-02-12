@@ -86,7 +86,7 @@ def getDtype(data):
 			else:
 				name=getIntDtype(max(data))
 		elif isStr(data[0]):
-			name='|S{}'.format(max([len(i) for i in data]) + 1)
+			name='|S{}'.format(max(max([len(i) for i in data]),1))
 		else:
 			name=getDtype(data[0])
 	elif isInt(data):
@@ -95,7 +95,7 @@ def getDtype(data):
 		else:
 			name=getIntDtype(data)
 	elif isStr(data):
-		name='|S{}'.format(len(data))
+		name='|S{}'.format(max(len(data),1))
 	elif isFloat(data):
 		# TODO: is there a better way to type floats? sig figs?
 		name=type(data).__name__
