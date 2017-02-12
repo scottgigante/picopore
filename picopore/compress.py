@@ -133,6 +133,7 @@ def rawCompress(f, group):
 	paths.extend(findDatasets(f, group, keyword="Summary")) # TODO: does poretools use summary?
 	paths.extend(findDatasets(f, group, keyword="Calibration_Strand"))
 	paths.extend(findDatasets(f, group, keyword="Hairpin_Split"))
+	paths.extend(findDatasets(f, group, keyword="EventDetection"))
 	for path in paths:
 		try:
 			del f[path]
