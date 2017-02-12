@@ -61,9 +61,10 @@ def deepLosslessCompress(f, group):
 			# index back to event detection
 			dataset = f[path].value
 			start = sampleRate * dataset["start"]
+			move = dataset["move"]
 			# otherwise, event by event
-			dataset = drop_fields(dataset, ["mean", "stdv", "start", "length"])
-			dataset = append_fields(dataset, ["start"], [start], [getDtype(start)])
+			dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
+			dataset = append_fields(dataset, ["start", "move"], [start, move], [getDtype(start), getDtype(move)])
 			rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
 	# remove group hierarchy
 	f.create_group(__basegroup_name__)
