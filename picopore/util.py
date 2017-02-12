@@ -31,8 +31,30 @@ def recursiveFindFast5(input):
 			files.append(path)
 	return files
 
-def isGroup(object):
-	return type(object).__name__ == "Group"
+def isType(obj, types):
+	try:
+		return type(obj).__name__ in types
+	except TypeError as e:
+		if e.message.endswith("is not iterable"):
+			# got a single value, not a list
+			return type(obj).__name__ == types
+		else:
+			raise e
+
+def isGroup(obj):
+	return isType(obj, ["Group"])
+
+def isInt(obj):
+	return isType(obj, ['int', 'int4', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint4', 'uint8', 'uint16', 'uint32', 'uint64'])
+
+def isStr(obj):
+	return isType(obj, ['str', 'string_'])
+
+def isArray(obj):
+	return isType(obj, ['list', 'ndarray', 'MaskedArray'])
+
+def isFloat(obj):
+	return isType(obj, ['float', 'float16', 'float32', 'float64'])
 	
 def getUIntDtype(num):
 	if num < 2**8:
@@ -43,7 +65,7 @@ def getUIntDtype(num):
 		name='uint32'
 	else:
 		name='uint64'
-	return np.dtype(name)
+	return name
 
 def getIntDtype(num):
 	if abs(num) < 2**7:
@@ -54,27 +76,32 @@ def getIntDtype(num):
 		name='int32'
 	else:
 		name='int64'
-	return np.dtype(name)
+	return name
 	
 def getDtype(data):
-	if type(data).__name__ in ['list', 'ndarray']:
-		if type(data[0]).__name__ in ['int', 'int4', 'int8', 'int16', 'int32', 'int64']:
+	if isArray(data):
+		if isInt(data[0]):
 			if min(data) > 0:
-				return getUIntDtype(max(data))
+				name=getUIntDtype(max(data))
 			else:
-				return getIntDtype(max(data))
-		elif type(data[0]).__name__ == 'str':
-			return '|S{}'.format(max([len(i) for i in data]) + 1)
-	if type(data).__name__ in ['int', 'int4', 'int8', 'int16', 'int32', 'int64']:
-		if data > 0:
-			return getUIntDtype(data)
+				name=getIntDtype(max(data))
+		elif isStr(data[0]):
+			name='|S{}'.format(max([len(i) for i in data]) + 1)
 		else:
-			return getIntDtype(data)
-	elif type(data).__name__ == 'str':
-		return '|S{}'.format(len(data))
+			name=getDtype(data[0])
+	elif isInt(data):
+		if data > 0:
+			name=getUIntDtype(data)
+		else:
+			name=getIntDtype(data)
+	elif isStr(data):
+		name='|S{}'.format(len(data))
+	elif isFloat(data):
+		# TODO: is there a better way to type floats? sig figs?
+		name=type(data).__name__
 	else:
-		# TODO: float?
 		return None
+	return np.dtype(name)
 
 def recursiveFindDatasets(group, keyword):
 	eventPaths = []
@@ -101,7 +128,10 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None
 	attrs = f.get(path).attrs
 	dataset = f.get(path).value if dataset is None else dataset
 	del f[path]
-	f.create_dataset(path, data=dataset, dtype=dataset.dtype, compression=compression, compression_opts=compression_opts)
+	if len(dataset.dtype) > 1:
+		f.create_dataset(path, data=dataset, dtype=[(name, getDtype(dataset[name])) for name in dataset.dtype.names], compression=compression, compression_opts=compression_opts)
+	else:
+		f.create_dataset(path, data=dataset, dtype=getDtype(dataset), compression=compression, compression_opts=compression_opts)
 	for name, value in attrs.items():
 		f[path].attrs[name] = value
 		
