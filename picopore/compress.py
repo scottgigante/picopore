@@ -60,7 +60,7 @@ def deepLosslessCompress(f, group):
 		if f[path].parent.parent.attrs.__contains__("event_detection"):
 			# index back to event detection
 			dataset = f[path].value
-			start = int(round(sampleRate * dataset["start"]))
+			start = [int(round(sampleRate * i)) for i in dataset["start"]]
 			move = dataset["move"]
 			# otherwise, event by event
 			dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
@@ -87,7 +87,18 @@ def deepLosslessDecompress(f, group):
 			if "mean" not in dataset.dtype.names:
 				eventDetectionPath = f[path].parent.parent.attrs.get("event_detection")
 				eventData = f[findDatasets(f, "all", entry_point=eventDetectionPath)[0]]
-				eventData = eventData[i for i in range(eventData.shape[0]) if eventData["start"] in dataset["start"]] # TODO: this is ordered, we could save time
+				start = dataset["start"][0]
+				end = dataset["start"][-1]
+				# constrain to range in basecall
+				eventData = eventData[np.logical_and(eventData["start"] >= start, eventData["start"] <= end)]
+				# remove missing events
+				i=0
+				keepIndex = []
+				for time in dataset["start"]:
+					while eventData["start"][i] != time and i < eventData.shape[0]:
+						i += 1
+					keepIndex.append(i)
+				eventData = eventData[keepIndex]
 				dataset = drop_fields(dataset, "start")
 				start = [i/sampleRate for i in eventData["start"]]
 				length = [i/sampleRate for i in eventData["length"]]

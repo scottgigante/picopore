@@ -17,6 +17,7 @@
 
 from __future__ import print_function
 import os
+import numpy as np
 
 def log(message, end='\n'):
 	print(message, end=end)
@@ -48,9 +49,9 @@ def getIntDtype(num):
 	
 def getDtype(data):
 	if type(data).__name__ in ['list', 'numpy.ndarray']:
-		if type(data[0].__name__ == 'int'):
+		if type(data[0]).__name__ == 'int':
 			return getIntDtype(max(data))
-		elif type(data[0].__name__ == 'str'):
+		elif type(data[0]).__name__ == 'str':
 			return '|S{}'.format(max([len(i) for i in data]) + 1)
 	if type(data).__name__ == 'int':
 		return getIntDtype(data)
