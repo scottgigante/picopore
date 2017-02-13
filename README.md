@@ -9,7 +9,7 @@ Options:
 - Minimal compression: reduces footprint by removing event detection and basecall data, leaving only raw signal (not yet implemented)
 
 Author: Scott Gigante, Walter & Eliza Hall Institute of Medical Research. 
-Contact: [Email] (gigante.s@wehi.edu.au), [Twitter] (twitter.com/scottgigante)
+Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter] (http://www.twitter.com/scottgigante)
 
 ## Installation ##
 
