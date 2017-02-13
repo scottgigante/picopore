@@ -68,12 +68,12 @@ Note that only ```lossless``` and ```deep-lossless``` are options for ```--rever
 
 Picopore compression allows most nanopore tools to operate unimpeded. We provide a list of software tools which can operate on compressed files unimpeded, and the process required to recover the necessary data if this is not possible.
 
-| Functionality        | Lossless |      Deep Lossless      | Raw | Minimal |
-|:--------------------:|:--------:|:-----------------------:|:---:|:-------:|
-| Metrichor            |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
-| nanonetcall          |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
-| poretools fastq      |     ✓       | ```picopore --revert``` |  ✓  | ```nanonetcall / Metrichor``` | 
-| nanopolish consensus |     ✓       | ```picopore --revert``` |  ```nanonetcall / Metrichor```  | ```nanonetcall / Metrichor``` | 
+| Functionality                     | Lossless |      Deep Lossless      | Raw                             | Minimal                       |
+|:---------------------------------:|:--------:|:-----------------------:|:-------------------------------:|:-----------------------------:|
+| Metrichor                         |     ✓    | ```picopore --revert``` |  ✓                              |    ✓                          | 
+| nanonetcall                       |     ✓    | ```picopore --revert``` |  ✓                              |    ✓                          | 
+| poretools fastq / poRe printfastq |     ✓    | ```picopore --revert``` |  ✓                              | ```nanonetcall / Metrichor``` | 
+| nanopolish consensus              |     ✓    | ```picopore --revert``` |  ```nanonetcall / Metrichor```  | ```nanonetcall / Metrichor``` | 
 
 
 ## FAQs ##
