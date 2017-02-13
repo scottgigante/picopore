@@ -13,13 +13,31 @@ Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter] (http://www.twitter.c
 
 ## Installation ##
 
-The latest stable version of Picopore is available on PyPi. Install it using ```pip install picopore```. For the bleeding edge, clone and install from GitHub.
+### Install via pypi
+
+The latest stable version of Picopore is available on PyPi. Install it using the following command:
+
+```
+pip install picopore
+``` 
+
+### Install via conda
+
+Picopore and dependencies could also be installed using conda. 
+
+```
+conda install picopore -c bioconda -c conda-forge
+```
+
+### Install from source
+
+For the bleeding edge, clone and install from GitHub.
 ```
 git clone https://www.github.com/scottgigante/picopore
 cd picopore
 python setup.py install
 ```
-Currently, ```h5py``` is only available on Windows via ```conda```. Picopore will be uploaded to ```conda``` in the near future.
+Currently, ```h5py``` is only available on Windows via ```conda```. 
 
 ### Requirements ###
 
