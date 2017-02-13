@@ -8,6 +8,9 @@ Options:
 - Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and FASTQ
 - Minimal compression: reduces footprint by removing event detection and basecall data, leaving only raw signal (not yet implemented)
 
+Author: Scott Gigante, Walter & Eliza Hall Institute of Medical Research. 
+Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter] (http://www.twitter.com/scottgigante)
+
 ## Installation ##
 
 The latest stable version of Picopore is available on PyPi. Install it using ```pip install picopore```. For the bleeding edge, clone and install from GitHub.
@@ -16,6 +19,7 @@ git clone https://www.github.com/scottgigante/picopore
 cd picopore
 python setup.py install
 ```
+Currently, ```h5py``` is only available on Windows via ```conda```. Picopore will be uploaded to ```conda``` in the near future.
 
 ### Requirements ###
 
