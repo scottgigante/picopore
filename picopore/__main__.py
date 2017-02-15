@@ -29,7 +29,7 @@ def run(revert, mode, inp, y, threads, group, prefix):
 	fileList = recursiveFindFast5(inp)
 	if len(fileList) == 0:
 		return 0
-	preSize = sum([os.stat(f).st_size for f in fileList])
+	preSize = sum([os.path.getsize(f) for f in fileList])
 	log("{} on {} files... ".format(message, len(fileList)))
 	if y or checkSure():
 		if threads <= 1:
@@ -39,7 +39,7 @@ def run(revert, mode, inp, y, threads, group, prefix):
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
-		postSize = sum([os.stat(getPrefixedFilename(f, prefix)).st_size for f in fileList])
+		postSize = sum([os.path.getsize(f) for f in fileList])
 		if revert:
 			preStr, postStr = "Compressed", "Raw"
 		else:
