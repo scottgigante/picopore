@@ -62,6 +62,19 @@ def chooseCompressFunc(revert, mode, fastq, summary):
 	except NameError:
 		log("No compression method selected")
 		exit(1)
+		
+def indexToZero(f, path, col, name="picopore.{}_index", dataColumn=None):
+	dataset = f[path]
+	name = name.format(col)
+	data = f[path].value
+	if not name in dataset.attrs.keys():
+		dataColumn = data[col] if dataColumn is None else dataColumn
+		start_index = min(dataColumn)
+		dataset.attrs.create(name, start_index, dtype=getDtype(start_index))
+		dataColumn = dataColumn-start_index
+		data = drop_fields(data, [col])
+		data = append_fields(data, [col], [dataColumn], [getDtype(dataColumn)])
+	return data
 
 def deepLosslessCompress(f, group):
 	paths = findDatasets(f, group, "Events")
@@ -73,25 +86,18 @@ def deepLosslessCompress(f, group):
 			if f[path].parent.parent.attrs.__contains__("event_detection"):
 				# index back to event detection
 				dataset = f[path].value
-				start = [int(round(sampleRate * i)) for i in dataset["start"]]
-				start_index = min(start)
-				start = start-start_index
+				start = np.array([int(round(sampleRate * i)) for i in dataset["start"]])
+				dataset = indexToZero(f, path, "start", dataColumn=start)
 				move = dataset["move"] # rewrite move dataset because it's int64 for max 2
 				# otherwise, event by event
-				dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
-				dataset = append_fields(dataset, ["start", "move"], [start, move], [getDtype(start), getDtype(move)])
+				dataset = drop_fields(dataset, ["mean", "stdv", "length", "move"])
+				dataset = append_fields(dataset, ["move"], [move], [getDtype(move)])
 				rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
-				f[path].attrs.create("start_index", start_index, dtype=getDtype(start_index))
 				# rewrite eventdetection too - start is also way too big here
 				eventDetectionPath = findDatasets(f, "all", entry_point=f[path].parent.parent.attrs.get("event_detection"))[0]
-				eventData = f[eventDetectionPath].value
-				start = eventData["start"]
-				start_index = min(start)
-				start = start - start_index
-				eventData = drop_fields(eventData, ["start"])
-				eventData = append_fields(eventData, ["start"], [start], [getDtype(start)])
-				rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=9, dataset=eventData)
-				f[eventDetectionPath].attrs.create("start_index", start_index, dtype=getDtype(start_index))
+				if "picopore.start_index" not in f[eventDetectionPath].attrs.keys():
+					eventData = indexToZero(f, eventDetectionPath, "start")
+					rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=9, dataset=eventData)
 				
 	if __basegroup_name__ not in f:
 		f.create_group(__basegroup_name__)
@@ -115,16 +121,18 @@ def deepLosslessDecompress(f, group):
 				eventDetectionPath = findDatasets(f, "all", entry_point=f[path].parent.parent.attrs.get("event_detection"))[0]
 				eventData = f[eventDetectionPath].value
 				try:
-					start = eventData["start"] + f[eventDetectionPath].attrs["start_index"]
+					start = eventData["start"] + f[eventDetectionPath].attrs["picopore.start_index"]
+					del f[eventDetectionPath].attrs["picopore.start_index"]
 					eventData = drop_fields(eventData, ["start"])
 					eventData = append_fields(eventData, ["start"], [start], [getDtype(start)])
 					rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=1, dataset=eventData)
-				except AttributeError:
+				except KeyError:
 					# must have been compressed without start indexing
 					pass
 				try:
-					start_index = f[path].attrs["start_index"]
-				except AttributeError:
+					start_index = f[path].attrs["picopore.start_index"]
+					del f[path].attrs["picopore.start_index"]
+				except KeyError:
 					# must have been compressed without start indexing
 					start_index=0
 				start = dataset["start"][0] + start_index
