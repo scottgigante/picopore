@@ -29,7 +29,7 @@ def run(revert, mode, inp, y, threads, group, prefix):
 	fileList = recursiveFindFast5(inp)
 	if len(fileList) == 0:
 		return 0
-	preSize = sum([os.stat(f).st_size for f in fileList])
+	preSize = sum([os.path.getsize(f) for f in fileList])
 	log("{} on {} files... ".format(message, len(fileList)))
 	if y or checkSure():
 		if threads <= 1:
@@ -39,14 +39,16 @@ def run(revert, mode, inp, y, threads, group, prefix):
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
-		postSize = sum([os.stat(getPrefixedFilename(f, prefix)).st_size for f in fileList])
+		postSize = sum([os.path.getsize(f) for f in fileList])
 		if revert:
-			preStr, postStr = "Compressed", "Reverted"
+			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:
-			preStr, postStr = "Original", "Compressed"
+			preStr, postStr = "Original size:", "Compressed size:"
 		log("Complete.")
-		log("{} size:\t{}".format(preStr, preSize))
-		log("{} size:\t{}".format(postStr, postSize))
+		str_len = max(len(preStr), len(postStr)) + 1
+		num_len = len(str(max(preSize, postSize)))
+		log("{}{}".format(preStr.ljust(str_len), str(preSize).rjust(num_len)))
+		log("{}{}".format(postStr.ljust(str_len), str(postSize).rjust(num_len)))
 		return 0
 	else:
 		log("User cancelled. Exiting.")
