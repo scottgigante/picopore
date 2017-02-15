@@ -15,7 +15,7 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser, ArgumentError, Action
 import os
 
 from version import __version__
@@ -53,7 +53,7 @@ def checkRealtime(args):
 		else:
 			return False
 
-class AutoBool(argparse.Action):
+class AutoBool(Action):
     def __init__(self, option_strings, dest, default=None, required=False, help=None):
         """Automagically create --foo / --no-foo argument pairs
 		Source: https://github.com/nanoporetech/nanonet/blob/master/nanonet/cmdargs.py"""
@@ -84,17 +84,17 @@ class AutoBool(argparse.Action):
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
-	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
+	parser.add_argument("--mode", choices=('lossless', 'deep-lossless', 'raw'), help="choose compression mode", required=True)
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
 	mut_excl = parser.add_mutually_exclusive_group()
 	mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
 	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (lossless modes only)")
-	parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only) (default: true)")
-	parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only) (default: false)")
+	parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
+	parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only)")
 	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
+	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
-	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
-	parser.add_argument("mode", choices=('lossless', 'deep-lossless', 'raw'), default='deep-lossless', help="choose compression mode (default: deep-lossless)")
+	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (Default: all)")
 	parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
 	args = parser.parse_args()
 	
