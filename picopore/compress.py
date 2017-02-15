@@ -24,7 +24,7 @@ from shutil import copyfile
 from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
-__raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection"]
+__raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection","Events"]
 
 def chooseCompressFunc(revert, mode, fastq, summary):
 	if revert:
@@ -145,12 +145,12 @@ def rawCompressFastqNoSummary(f, group):
 
 def rawCompressSummaryNoFastq(f, group):
 	keywords = __raw_compress_keywords__
-	keywords.append("Fastq")
+	keywords.append("BaseCalled")
 	return rawCompress(f, group, keywords)
 
 def rawCompressMinimal(f, group):
 	keywords = __raw_compress_keywords__
-	keywords.append("Basecall")
+	keywords.append("Analyses")
 	return rawCompress(f, group, keywords)
 
 def rawCompress(f, group, keywords):
