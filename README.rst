@@ -154,7 +154,7 @@ Deep Lossless
 
 Deep lossless compression modifies the structure of your fast5 file: any
 data extraction tools will not work until you run
-``python picopore.py --revert deep-lossless [input]``. 
+``python picopore.py --revert --mode deep-lossless [input]``. 
 
 - Use case: power users who wish to reduce the size of their files during data transfer, or for long-term storage
 
