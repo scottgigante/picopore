@@ -53,6 +53,34 @@ def checkRealtime(args):
 		else:
 			return False
 
+class AutoBool(argparse.Action):
+    def __init__(self, option_strings, dest, default=None, required=False, help=None):
+        """Automagically create --foo / --no-foo argument pairs
+		Source: https://github.com/nanoporetech/nanonet/blob/master/nanonet/cmdargs.py"""
+
+        if default is None:
+            raise ValueError('You must provide a default with AutoBool action')
+        if len(option_strings)!=1:
+            raise ValueError('Only single argument is allowed with AutoBool action')
+        opt = option_strings[0]
+        if not opt.startswith('--'):
+            raise ValueError('AutoBool arguments must be prefixed with --')
+
+        opt = opt[2:]
+        opts = ['--' + opt, '--no-' + opt]
+        if default:
+            default_opt = opts[0]
+        else:
+            default_opt = opts[1]
+        super(AutoBool, self).__init__(opts, dest, nargs=0, const=None,
+                                       default=default, required=required,
+                                       help='{} (Default: {})'.format(help, default_opt))
+    def __call__(self, parser, namespace, values, option_strings=None):
+        if option_strings.startswith('--no-'):
+            setattr(namespace, self.dest, False)
+        else:
+            setattr(namespace, self.dest, True)
+
 def parseArgs():
 	parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
 	parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
@@ -60,14 +88,9 @@ def parseArgs():
 	parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
 	mut_excl = parser.add_mutually_exclusive_group()
 	mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
-	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (note: does not work on pre-compressed files)")
-	raw_group = parser.add_argument_group()
-	fastq_group = raw_group.add_mutually_exclusive_group()
-	fastq_group.add_argument("--with-fastq", action="store_true", dest="fastq", default=True, help="retain FASTQ data")
-	fastq_group.add_argument("--no-fastq", action="store_false", dest="fastq", help="remove FASTQ data")
-	summary_group = raw_group.add_mutually_exclusive_group()
-	summary_group.add_argument("--with-summary", action="store_true", dest="summary", default=True, help="retain basecalling summary data")
-	summary_group.add_argument("--no-summary", action="store_false", dest="summary", help="remove basecalling summary data")
+	test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (lossless modes only)")
+	parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only) (default: true)")
+	parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only) (default: false)")
 	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
 	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (default: all)")
