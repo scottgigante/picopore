@@ -39,7 +39,7 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
-		postSize = sum([os.path.getsize(f) for f in fileList])
+		postSize = sum([os.path.getsize(getPrefixedFilename(f, prefix)) for f in fileList])
 		if revert:
 			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:
