@@ -13,13 +13,31 @@ Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter] (http://www.twitter.c
 
 ## Installation ##
 
-The latest stable version of Picopore is available on PyPi. Install it using ```pip install picopore```. For the bleeding edge, clone and install from GitHub.
+### Install via pypi
+
+The latest stable version of Picopore is available on PyPi. Install it using the following command:
+
+```
+pip install picopore
+``` 
+
+### Install via conda
+
+Picopore and dependencies could also be installed using conda. 
+
+```
+conda install picopore -c bioconda -c conda-forge
+```
+
+### Install from source
+
+For the bleeding edge, clone and install from GitHub.
 ```
 git clone https://www.github.com/scottgigante/picopore
 cd picopore
 python setup.py install
 ```
-Currently, ```h5py``` is only available on Windows via ```conda```. Picopore will be uploaded to ```conda``` in the near future.
+Currently, ```h5py``` is only available on Windows via ```conda```. 
 
 ### Requirements ###
 
@@ -68,12 +86,12 @@ Note that only ```lossless``` and ```deep-lossless``` are options for ```--rever
 
 Picopore compression allows most nanopore tools to operate unimpeded. We provide a list of software tools which can operate on compressed files unimpeded, and the process required to recover the necessary data if this is not possible.
 
-| Functionality        | Lossless |      Deep Lossless      | Raw | Minimal |
-|:--------------------:|:--------:|:-----------------------:|:---:|:-------:|
-| Metrichor            |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
-| nanonetcall          |     ✓       | ```picopore --revert``` |  ✓  |    ✓    | 
-| poretools fastq      |     ✓       | ```picopore --revert``` |  ✓  | ```nanonetcall / Metrichor``` | 
-| nanopolish consensus |     ✓       | ```picopore --revert``` |  ```nanonetcall / Metrichor```  | ```nanonetcall / Metrichor``` | 
+| Functionality                     | Lossless |      Deep Lossless      | Raw                             | Minimal                       |
+|:---------------------------------:|:--------:|:-----------------------:|:-------------------------------:|:-----------------------------:|
+| Metrichor                         |     ✓    | ```picopore --revert``` |  ✓                              |    ✓                          | 
+| nanonetcall                       |     ✓    | ```picopore --revert``` |  ✓                              |    ✓                          | 
+| poretools fastq / poRe printfastq |     ✓    | ```picopore --revert``` |  ✓                              | ```nanonetcall / Metrichor``` | 
+| nanopolish consensus              |     ✓    | ```picopore --revert``` |  ```nanonetcall / Metrichor```  | ```nanonetcall / Metrichor``` | 
 
 
 ## FAQs ##

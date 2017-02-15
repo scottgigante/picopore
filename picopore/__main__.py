@@ -41,12 +41,12 @@ def run(revert, mode, inp, y, threads, group, prefix):
 			pool.map(compressWrapper, argList)
 		postSize = sum([os.path.getsize(f) for f in fileList])
 		if revert:
-			preStr, postStr = "Compressed", "Raw"
+			preStr, postStr = "Compressed", "Reverted"
 		else:
-			preStr, postStr = "Raw", "Compressed"
+			preStr, postStr = "Original", "Compressed"
 		log("Complete.")
-		log("{} size: {}".format(preStr, preSize))
-		log("{} size: {}".format(postStr, postSize))
+		log("{} size:\t{}".format(preStr, preSize))
+		log("{} size:\t{}".format(postStr, postSize))
 		return 0
 	else:
 		log("User cancelled. Exiting.")
