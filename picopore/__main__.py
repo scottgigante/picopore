@@ -69,7 +69,7 @@ def runRealtime(args):
 		while True:
 			sleep(1)
 	except KeyboardInterrupt:
-		log("Exiting Picopore.")
+		log("\nExiting Picopore.")
 	readsFolder.stop()
 	
 def main():
