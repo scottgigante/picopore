@@ -3,10 +3,9 @@
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
 Options:
-- Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality
-- Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset
-- Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and FASTQ
-- Minimal compression: reduces footprint by removing event detection and basecall data, leaving only raw signal (not yet implemented)
+- Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality;
+- Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset;
+- Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and a choice of FASTQ data, basecall summary, both or neither.
 
 Author: Scott Gigante, Walter & Eliza Hall Institute of Medical Research. 
 Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter] (http://www.twitter.com/scottgigante)
@@ -50,35 +49,40 @@ Picopore requires the following Python packages:
 ## Usage ##
 
 ```
-usage: picopore [-h] [-v] [-y] [--revert] [--realtime | --test]
-                [--prefix PREFIX] [-t THREADS] [-g GROUP]
-                {lossless,deep-lossless,raw} [input [input ...]]
+usage: picopore [-h] [-v] --mode {lossless,deep-lossless,raw} [--revert]
+                [--realtime | --test] [--fastq] [--summary] [--prefix PREFIX]
+                [-y] [-t THREADS] [-g GROUP]
+                [input [input ...]]
 ```
 ```
 positional arguments:
-  {lossless,deep-lossless,raw}
-                        choose compression mode (default: deep-lossless)
   input                 list of directories or fast5 files to shrink
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show version number and exit
-  -y                    skip confirm step
+  --mode {lossless,deep-lossless,raw}
+                        choose compression mode
   --revert              reverts files to original size (lossless modes only)
   --realtime            monitor a directory for new reads and compress them in
                         real time
   --test                compress to a temporary file and check that all
-                        datasets and attributes are equal (note: does not work
-                        on pre-compressed files)
+                        datasets and attributes are equal (lossless modes
+                        only)
+  --fastq, --no-fastq   retain FASTQ data (raw mode only) (Default: --fastq)
+  --summary, --no-summary
+                        retain summary data (raw mode only) (Default: --no-
+                        summary)
   --prefix PREFIX       add prefix to output files to prevent overwrite
+  -y                    skip confirm step
   -t THREADS, --threads THREADS
-                        number of threads (default: 1)
+                        number of threads (Default: 1)
   -g GROUP, --group GROUP
                         group number allows discrimination between different
-                        basecalling runs (default: all)
+                        basecalling runs (Default: all)
 ```
 
-It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, ```raw```, and ```minimal```. 
+It is necessary to choose one compression mode out of ```lossless```, ```deep-lossless```, and ```raw```. 
 
 Note that only ```lossless``` and ```deep-lossless``` are options for ```--revert``.
 

@@ -93,7 +93,7 @@ def parseArgs():
 	parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only)")
 	parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
 	parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
-	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (default: 1)")
+	parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)")
 	parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (Default: all)")
 	parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
 	args = parser.parse_args()
