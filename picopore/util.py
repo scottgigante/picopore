@@ -141,10 +141,20 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None
 	attrs = f.get(path).attrs
 	dataset = f.get(path).value if dataset is None else dataset
 	del f[path]
-	if len(dataset.dtype) > 1:
+	try:
+		cols = dataset.dtype.names
+		if cols is None:
+			raise AttributeError("Array dtype is missing names")
 		f.create_dataset(path, data=dataset, dtype=[(name, getDtype(dataset[name])) for name in dataset.dtype.names], compression=compression, compression_opts=compression_opts)
-	else:
-		f.create_dataset(path, data=dataset, dtype=getDtype(dataset), compression=compression, compression_opts=compression_opts)
+	except AttributeError:
+		try:
+			f.create_dataset(path, data=dataset, dtype=getDtype(dataset), compression=compression, compression_opts=compression_opts)
+		except TypeError as e:
+			if e.message == "Scalar datasets don't support chunk/filter options":
+				f.create_dataset(path, data=dataset, dtype=getDtype(dataset))
+			else:
+				log(path)
+				raise e
 	for name, value in attrs.items():
 		f[path].attrs[name] = value
 		
