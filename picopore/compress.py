@@ -150,8 +150,7 @@ def rawCompressSummaryNoFastq(f, group):
 
 def rawCompressMinimal(f, group):
 	keywords = __raw_compress_keywords__
-	keywords.append("Fastq")
-	keywords.append("Summary")
+	keywords.append("Basecall")
 	return rawCompress(f, group, keywords)
 
 def rawCompress(f, group, keywords):
