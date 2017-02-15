@@ -24,8 +24,9 @@ from shutil import copyfile
 from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
+__raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection"]
 
-def chooseCompressFunc(revert, mode):
+def chooseCompressFunc(revert, mode, fastq, summary):
 	if revert:
 		if mode == 'lossless':
 			func = losslessDecompress
@@ -44,8 +45,18 @@ def chooseCompressFunc(revert, mode):
 			func = deepLosslessCompress
 			name = "Performing deep lossless compression"
 		elif mode == 'raw':
-			func = rawCompress
-			name = "Performing raw compression"
+			if fastq and summary:
+				func = rawCompressFastqSummary
+				name = "Performing raw compression with FASTQ and summary"
+			elif fastq:
+				func = rawCompressFastqNoSummary
+				name = "Performing raw compression with FASTQ and no summary"
+			elif summary:
+				func = rawCompressSummaryNoFastq
+				name = "Performing raw compression with summary and no FASTQ"
+			else:
+				func = rawCompressMinimal
+				name = "Performing raw compression with no summary and no FASTQ"
 	try:
 		return func, name
 	except NameError:
@@ -123,17 +134,30 @@ def losslessDecompress(f, group):
 	for path in paths:
 		rewriteDataset(f, path)
 	return "GZIP=1"
-		
-def rawCompress(f, group):
-	paths = findDatasets(f, group, keyword="Events")
-	paths.extend(findDatasets(f, group, keyword="Alignment"))
-	paths.extend(findDatasets(f, group, keyword="Log"))
-	paths.extend(findDatasets(f, group, keyword="Configuration"))
-	paths.extend(findDatasets(f, group, keyword="HairpinAlign"))
-	paths.extend(findDatasets(f, group, keyword="Summary")) # TODO: does poretools use summary?
-	paths.extend(findDatasets(f, group, keyword="Calibration_Strand"))
-	paths.extend(findDatasets(f, group, keyword="Hairpin_Split"))
-	paths.extend(findDatasets(f, group, keyword="EventDetection"))
+
+def rawCompressFastqSummary(f, group):
+	return rawCompress(f, group, __raw_compress_keywords__)
+	
+def rawCompressFastqNoSummary(f, group):
+	keywords = __raw_compress_keywords__
+	keywords.append("Summary")
+	return rawCompress(f, group, keywords)
+
+def rawCompressSummaryNoFastq(f, group):
+	keywords = __raw_compress_keywords__
+	keywords.append("Fastq")
+	return rawCompress(f, group, keywords)
+
+def rawCompressMinimal(f, group):
+	keywords = __raw_compress_keywords__
+	keywords.append("Fastq")
+	keywords.append("Summary")
+	return rawCompress(f, group, keywords)
+
+def rawCompress(f, group, keywords):
+	paths = []
+	for kw in keywords:
+		paths.extend(findDatasets(f, group, keyword=kw))
 	for path in paths:
 		try:
 			del f[path]
