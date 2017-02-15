@@ -74,11 +74,25 @@ def deepLosslessCompress(f, group):
 				# index back to event detection
 				dataset = f[path].value
 				start = [int(round(sampleRate * i)) for i in dataset["start"]]
-				move = dataset["move"]
+				start_index = min(start)
+				start = start-start_index
+				move = dataset["move"] # rewrite move dataset because it's int64 for max 2
 				# otherwise, event by event
 				dataset = drop_fields(dataset, ["mean", "stdv", "start", "length", "move"])
 				dataset = append_fields(dataset, ["start", "move"], [start, move], [getDtype(start), getDtype(move)])
 				rewriteDataset(f, path, compression="gzip", compression_opts=9, dataset=dataset)
+				f[path].attrs.create("start_index", start_index, dtype=getDtype(start_index))
+				# rewrite eventdetection too - start is also way too big here
+				eventDetectionPath = findDatasets(f, "all", entry_point=f[path].parent.parent.attrs.get("event_detection"))[0]
+				eventData = f[eventDetectionPath].value
+				start = eventData["start"]
+				start_index = min(start)
+				start = start - start_index
+				eventData = drop_fields(eventData, ["start"])
+				eventData = append_fields(eventData, ["start"], [start], [getDtype(start)])
+				rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=9, dataset=eventData)
+				f[eventDetectionPath].attrs.create("start_index", start_index, dtype=getDtype(start_index))
+				
 	if __basegroup_name__ not in f:
 		f.create_group(__basegroup_name__)
 		for name, group in f.items():
@@ -98,17 +112,30 @@ def deepLosslessDecompress(f, group):
 			# index back to event detection
 			dataset = f[path].value
 			if "mean" not in dataset.dtype.names:
-				eventDetectionPath = f[path].parent.parent.attrs.get("event_detection")
-				eventData = f[findDatasets(f, "all", entry_point=eventDetectionPath)[0]]
-				start = dataset["start"][0]
-				end = dataset["start"][-1]
+				eventDetectionPath = findDatasets(f, "all", entry_point=f[path].parent.parent.attrs.get("event_detection"))[0]
+				eventData = f[eventDetectionPath].value
+				try:
+					start = eventData["start"] + f[eventDetectionPath].attrs["start_index"]
+					eventData = drop_fields(eventData, ["start"])
+					eventData = append_fields(eventData, ["start"], [start], [getDtype(start)])
+					rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=1, dataset=eventData)
+				except AttributeError:
+					# must have been compressed without start indexing
+					pass
+				try:
+					start_index = f[path].attrs["start_index"]
+				except AttributeError:
+					# must have been compressed without start indexing
+					start_index=0
+				start = dataset["start"][0] + start_index
+				end = dataset["start"][-1] + start_index
 				# constrain to range in basecall
 				eventData = eventData[np.logical_and(eventData["start"] >= start, eventData["start"] <= end)]
 				# remove missing events
 				i=0
 				keepIndex = []
 				for time in dataset["start"]:
-					while eventData["start"][i] != time and i < eventData.shape[0]:
+					while eventData["start"][i] != time + start_index and i < eventData.shape[0]:
 						i += 1
 					keepIndex.append(i)
 				eventData = eventData[keepIndex]
