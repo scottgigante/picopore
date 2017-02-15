@@ -1,20 +1,16 @@
 Picopore v 0.2.1
 ================
 
-A tool for reducing the size of Oxford Nanopore Technologies' datasets
-without losing information.
+A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
-Options: - Lossless compression: reduces footprint without reducing the
-ability to use other nanopore tools by using HDF5's inbuilt gzip
-functionality; - Deep lossless compression: reduces footprint without
-removing any data by indexing basecalled dataset to the event detection
-dataset; - Raw compression: reduces footprint by removing event
-detection and basecall data, leaving only raw signal, configuration data
-and a choice of FASTQ data, basecall summary, both or neither.
+Options: 
+
+* Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality; 
+* Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset; 
+* Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and a choice of FASTQ data, basecall summary, both or neither.
 
 Author: Scott Gigante, Walter & Eliza Hall Institute of Medical
-Research. Contact: [Email] (mailto:gigante.s@wehi.edu.au), [Twitter]
-(http://www.twitter.com/scottgigante)
+Research. Contact: `Email <mailto:gigante.s@wehi.edu.au>`_, `Twitter <http://www.twitter.com/scottgigante>`_
 
 Installation
 ------------
@@ -22,8 +18,7 @@ Installation
 Install via pypi
 ~~~~~~~~~~~~~~~~
 
-The latest stable version of Picopore is available on PyPi. Install it
-using the following command:
+The latest stable version of Picopore is available on PyPi. Install it using the following command:
 
 ::
 
@@ -58,8 +53,10 @@ Picopore requires ``h5repack`` from ``hdf5-tools``, which can be
 downloaded from https://support.hdfgroup.org/downloads/index.html or
 using ``sudo apt-get install hdf5-tools``.
 
-Picopore requires the following Python packages: \* h5py \* watchdog
-(for real-time compression)
+Picopore requires the following Python packages: 
+
+* ``h5py`` 
+* ``watchdog`` (for real-time compression)
 
 Usage
 -----
@@ -102,8 +99,7 @@ Usage
 It is necessary to choose one compression mode out of ``lossless``,
 ``deep-lossless``, and ``raw``.
 
-Note that only ``lossless`` and ``deep-lossless`` are options for
-\`\ ``--revert``.
+Note that only ``lossless`` and ``deep-lossless`` are options for ``--revert``.
 
 Compression Modes
 -----------------
@@ -113,22 +109,15 @@ provide a list of software tools which can operate on compressed files
 unimpeded, and the process required to recover the necessary data if
 this is not possible.
 
-+--------------------+-------+---------------+-------------------+------------------+
-| Functionality      | Lossl | Deep Lossless | Raw               | Minimal          |
-|                    | ess   |               |                   |                  |
-+====================+=======+===============+===================+==================+
-| Metrichor          | ✓     | ``picopore -- | ✓                 | ✓                |
-|                    |       | revert``      |                   |                  |
-+--------------------+-------+---------------+-------------------+------------------+
-| nanonetcall        | ✓     | ``picopore -- | ✓                 | ✓                |
-|                    |       | revert``      |                   |                  |
-+--------------------+-------+---------------+-------------------+------------------+
-| poretools fastq /  | ✓     | ``picopore -- | ✓                 | ``nanonetcall /  |
-| poRe printfastq    |       | revert``      |                   | Metrichor``      |
-+--------------------+-------+---------------+-------------------+------------------+
-| nanopolish         | ✓     | ``picopore -- | ``nanonetcall / M | ``nanonetcall /  |
-| consensus          |       | revert``      | etrichor``        | Metrichor``      |
-+--------------------+-------+---------------+-------------------+------------------+
+====================== ============= ======================= ============================= =============================
+Functionality           Lossless      Deep Lossless           Raw                           Raw ``--no-fastq``           
+====================== ============= ======================= ============================= =============================
+Metrichor               ✓             ``picopore --revert``   ✓                            ✓                
+nanonetcall             ✓             ``picopore --revert``   ✓                            ✓                
+poretools fastq         ✓             ``picopore --revert``   ✓                            ``nanonetcall / Metrichor``
+poRe printfastq         ✓             ``picopore --revert``   ✓                            ``nanonetcall / Metrichor``
+nanopolish consensus    ✓             ``picopore --revert``   ``nanonetcall / Metrichor``   ``nanonetcall / Metrichor``
+====================== ============= ======================= ============================= =============================
 
 FAQs
 ----
@@ -156,17 +145,18 @@ Lossless
 ^^^^^^^^
 
 Lossless compression uses HDF5's builtin compression, so all existing
-fast5 tools will work seamlessly. - Use case: power users who wish to
-reduce server storage footprint
+fast5 tools will work seamlessly. 
+
+- Use case: power users who wish to reduce server storage footprint
 
 Deep Lossless
 ^^^^^^^^^^^^^
 
 Deep lossless compression modifies the structure of your fast5 file: any
 data extraction tools will not work until you run
-``python picopore.py --revert deep-lossless [input]``. - Use case: power
-users who wish to reduce the size of their files during data transfer,
-or for long-term storage
+``python picopore.py --revert deep-lossless [input]``. 
+
+- Use case: power users who wish to reduce the size of their files during data transfer, or for long-term storage
 
 Raw
 ^^^
@@ -177,19 +167,19 @@ squiggle-space data are ``nanopolish``, ``nanoraw`` and
 ``nanonettrain``. If you do not intend on using these tools, your tools
 will work as before. If you do intend to use these tools, the raw signal
 is retained, and you can resubmit the files for basecalling to generate
-new squiggle-space data. - Use case: end users who are only interested
-in using the FASTQ data - Use case: power users running local
-basecalling with limited local disk space, who wish to use FASTQ
-immediately and will submit reads to Metrichor at a later date
+new squiggle-space data. 
 
-Minimal
-^^^^^^^
+- Use case: end users who are only interested in using the FASTQ data 
+- Use case: power users running local basecalling with limited local disk space, who wish to use FASTQ immediately and will submit reads to Metrichor at a later date
+
+Raw ``--no-fastq``
+^^^^^^^^^^^^^^^^^^
 
 Minimal compression removes all data not required to rerun basecalling
 on the fast5 files. This is only recommended for long-term storage, and
-requires files to be re-basecalled for any data to be retrieved. - Use
-case: users storing historical runs for archive purposes, with no
-short-term plans to use these reads
+requires files to be re-basecalled for any data to be retrieved. 
+
+- Use case: users storing historical runs for archive purposes, with no short-term plans to use these reads
 
 Do I lose any data when using Picopore?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
