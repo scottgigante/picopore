@@ -24,8 +24,8 @@ from util import recursiveFindFast5, log, getPrefixedFilename
 from compress import compressWrapper, chooseCompressFunc
 from test import checkEquivalent
 
-def run(revert, mode, inp, y, threads, group, prefix):
-	func, message = chooseCompressFunc(revert, mode)
+def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False):
+	func, message = chooseCompressFunc(revert, mode, fastq, summary)
 	fileList = recursiveFindFast5(inp)
 	if len(fileList) == 0:
 		return 0
@@ -39,7 +39,7 @@ def run(revert, mode, inp, y, threads, group, prefix):
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
 			pool.map(compressWrapper, argList)
-		postSize = sum([os.path.getsize(f) for f in fileList])
+		postSize = sum([os.path.getsize(getPrefixedFilename(f, prefix)) for f in fileList])
 		if revert:
 			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:
@@ -56,8 +56,8 @@ def run(revert, mode, inp, y, threads, group, prefix):
 		
 def runTest(args):
 	fileList = recursiveFindFast5(args.input)
-	run(False, args.mode, args.input, True, args.threads, args.group, args.prefix)
-	run(True, args.mode, [getPrefixedFilename(i, args.prefix) for i in args.input], True, args.threads, args.group, None)
+	run(False, args.mode, args.input, True, args.threads, args.group, args.prefix, args.fastq, args.summary)
+	run(True, args.mode, [getPrefixedFilename(i, args.prefix) for i in args.input], True, args.threads, args.group, None, args.fastq, args.summary)
 	for f in fileList:
 		compressedFile = getPrefixedFilename(f, args.prefix)
 		checkEquivalent(f, compressedFile)
@@ -71,7 +71,7 @@ def runRealtime(args):
 		while True:
 			sleep(1)
 	except KeyboardInterrupt:
-		log("Exiting Picopore.")
+		log("\nExiting Picopore.")
 	readsFolder.stop()
 	
 def main():
@@ -81,7 +81,7 @@ def main():
 	elif args.realtime:
 		runRealtime(args)
 	else:
-		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
+		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary)
 	return 0
 
 if __name__ == "__main__":

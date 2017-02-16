@@ -37,11 +37,11 @@ class ReadsFolder():
 				observedPaths.append(path)
 		log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
 		self.observer.start()
-		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix)
+		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary)
 
 	def on_created(self, event):
 		if self.args.prefix is None or not os.path.basename(event.src_path).startswith(self.args.prefix):
-			run(self.args.revert, self.args.mode, [event.src_path], self.args.y, self.args.threads, self.args.group, self.args.prefix)
+			run(self.args.revert, self.args.mode, [event.src_path], self.args.y, self.args.threads, self.args.group, self.args.prefix, self.args.fastq, self.args.summary)
 
 	def stop(self):
 		self.observer.stop()
