@@ -209,10 +209,10 @@ def compress(func, filename, group="all", prefix=None):
 	try:
 		with h5py.File(newFilename, 'r+') as f:
 			filtr = func(f, group)
+			subprocess.call(["h5repack","-f",filtr,newFilename,"{}.tmp".format(newFilename)])
+		subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
 	except Exception as e:
 		log(e.message)
-	subprocess.call(["h5repack","-f",filtr,newFilename,"{}.tmp".format(newFilename)])
-	subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
 
 def compressWrapper(args):
 	return compress(*args)

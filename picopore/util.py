@@ -56,6 +56,9 @@ def isType(obj, types):
 
 def isGroup(obj):
 	return isType(obj, ["Group"])
+	
+def isDataset(obj):
+	return isType(obj, ["Dataset"])
 
 def isInt(obj):
 	return isType(obj, ['int', 'int4', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint4', 'uint8', 'uint16', 'uint32', 'uint64'])
@@ -138,8 +141,11 @@ def findDatasets(f, group_id, keyword="Events", entry_point="Analyses"):
 	return eventPaths
 	
 def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None):
-	attrs = f.get(path).attrs
-	dataset = f.get(path).value if dataset is None else dataset
+	obj = f.get(path)
+	if not isDataset(obj):
+		return
+	attrs = obj.attrs
+	dataset = obj.value if dataset is None else dataset
 	del f[path]
 	try:
 		cols = dataset.dtype.names
