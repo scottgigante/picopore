@@ -148,8 +148,11 @@ def compress(func, filename, group="all", prefix=None):
 		copyfile(filename, newFilename)
 	else:
 		newFilename = filename
-	with h5py.File(newFilename, 'r+') as f:
-		filtr = func(f, group)
+	try:
+		with h5py.File(newFilename, 'r+') as f:
+			filtr = func(f, group)
+	except Exception as e:
+		log(e.message)
 	subprocess.call(["h5repack","-f",filtr,newFilename,"{}.tmp".format(newFilename)])
 	subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
 
