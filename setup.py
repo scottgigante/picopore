@@ -1,5 +1,6 @@
 import os
 from setuptools import setup
+import sys
 
 version_py = os.path.join(os.path.dirname(__file__), 'picopore', 'version.py')
 version = open(version_py).read().strip().split('=')[-1].replace('"','').strip()
