@@ -18,7 +18,7 @@ setup(
   package_dir={'picopore': "picopore"},
   version=version,
   install_requires=['h5py>2.2.0','watchdog'],
-  requires=['python (>=2.7, <3.0)'],
+  requires=['python (>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*)'],
   description = 'A tool for reducing the size of Oxford Nanopore Technologies\' datasets without losing information.',
   long_description=read('README.rst'),
   author = 'Scott Gigante',
@@ -26,7 +26,7 @@ setup(
   url = 'https://github.com/scottgigante/picopore', # use the URL to the github repo
   keywords = ['nanopore', 'compression', 'hdf5', 'fast5', 'oxford', 'minion'], # arbitrary keywords
   classifiers = [
-		"Development Status :: 3 - Alpha",
+		"Development Status :: 4 - Beta",
 		'Intended Audience :: Science/Research',
 		'License :: OSI Approved :: GNU General Public License (GPL)',
 		'Topic :: Scientific/Engineering :: Bio-Informatics'

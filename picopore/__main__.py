@@ -19,10 +19,10 @@ from multiprocessing import Pool
 import os
 from time import sleep
 
-from parse_args import parseArgs, checkSure
-from util import recursiveFindFast5, log, getPrefixedFilename
-from compress import compressWrapper, chooseCompressFunc
-from test import checkEquivalent
+from picopore.parse_args import parseArgs, checkSure
+from picopore.util import recursiveFindFast5, log, getPrefixedFilename
+from picopore.compress import compressWrapper, chooseCompressFunc
+from picopore.test import checkEquivalent
 
 def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False):
 	func, message = chooseCompressFunc(revert, mode, fastq, summary)
@@ -65,7 +65,7 @@ def runTest(args):
 	return 0
 
 def runRealtime(args):
-	from realtime import ReadsFolder
+	from picopore.realtime import ReadsFolder
 	readsFolder = ReadsFolder(args)
 	try:
 		while True:

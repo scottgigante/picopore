@@ -19,8 +19,8 @@ import os
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-from __main__ import run
-from util import log
+from picopore.__main__ import run
+from picopore.util import log
 
 class ReadsFolder():
 	def __init__(self, args):

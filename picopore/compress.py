@@ -21,7 +21,7 @@ import os
 from numpy.lib.recfunctions import drop_fields, append_fields
 from shutil import copyfile
 
-from util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
+from picopore.util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
 __raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection","Events"]
@@ -212,7 +212,7 @@ def compress(func, filename, group="all", prefix=None):
 		subprocess.call(["h5repack","-f",filtr,newFilename, "{}.tmp".format(newFilename)])
 		subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
 	except Exception as e:
-		log(e.message)
+		log(str(e))
 
 def compressWrapper(args):
 	return compress(*args)

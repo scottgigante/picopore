@@ -16,7 +16,7 @@
 """
 
 import h5py
-from util import log, isGroup, isArray
+from picopore.util import log, isGroup, isArray
 
 def checkContents(obj1, obj2, name=None):
 	name = obj1.name if name is None else name

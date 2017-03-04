@@ -17,9 +17,10 @@
 
 from argparse import ArgumentParser, ArgumentError, Action
 import os
+from builtins import input
 
-from version import __version__
-from util import log
+from picopore.version import __version__
+from picopore.util import log
 
 def checkTestMode(test, args):
 	if args.test:
@@ -105,7 +106,8 @@ def parseArgs():
 	return args
 	
 def checkSure():
-	response = raw_input("Are you sure? (yes|no): ")
+	response = input("Are you sure? (yes|no): ")
+	assert isinstance(response, str)
 	if "yes".startswith(response):
 		return 1
 	else:

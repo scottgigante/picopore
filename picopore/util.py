@@ -48,7 +48,7 @@ def isType(obj, types):
 	try:
 		return type(obj).__name__ in types
 	except TypeError as e:
-		if e.message.endswith("is not iterable"):
+		if str(e).endswith("is not iterable"):
 			# got a single value, not a list
 			return type(obj).__name__ == types
 		else:
@@ -64,7 +64,7 @@ def isInt(obj):
 	return isType(obj, ['int', 'int4', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint4', 'uint8', 'uint16', 'uint32', 'uint64'])
 
 def isStr(obj):
-	return isType(obj, ['str', 'string_'])
+	return isType(obj, ['str', 'string_', 'bytes_'])
 
 def isArray(obj):
 	return isType(obj, ['list', 'ndarray', 'MaskedArray'])
@@ -151,12 +151,13 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None
 		cols = dataset.dtype.names
 		if cols is None:
 			raise AttributeError("Array dtype is missing names")
-		f.create_dataset(path, data=dataset, dtype=[(name, getDtype(dataset[name])) for name in dataset.dtype.names], compression=compression, compression_opts=compression_opts)
+		newtype=[(name, getDtype(dataset[name])) for name in dataset.dtype.names]
+		f.create_dataset(path, data=dataset.astype(newtype), dtype=newtype, compression=compression, compression_opts=compression_opts)
 	except AttributeError:
 		try:
 			f.create_dataset(path, data=dataset, dtype=getDtype(dataset), compression=compression, compression_opts=compression_opts)
 		except TypeError as e:
-			if e.message == "Scalar datasets don't support chunk/filter options":
+			if str(e) == "Scalar datasets don't support chunk/filter options":
 				f.create_dataset(path, data=dataset, dtype=getDtype(dataset))
 			else:
 				log(path)
@@ -185,7 +186,7 @@ def uncollapseGroups(f, basegroup):
 		try:
 			f.create_group(groupname)
 		except ValueError as e:
-			if e.message == "Unable to create group (Name already exists)":
+			if str(e) == "Unable to create group (Name already exists)":
 				pass
 			else:
 				raise e
