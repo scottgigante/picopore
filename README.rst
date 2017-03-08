@@ -3,6 +3,8 @@ Picopore v 1.1.1
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
+If you find Picopore useful, please cite it at http://dx.doi.org/10.12688/f1000research.11022.1
+
 Options: 
 
 * Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality; 
