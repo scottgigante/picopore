@@ -21,7 +21,7 @@ setup(
   packages = ['picopore'],
   package_dir={'picopore': "picopore"},
   version=version,
-  install_requires=['h5py>2.2.0','watchdog'],
+  install_requires=['h5py>2.2.0','watchdog','future'],
   description = 'A tool for reducing the size of Oxford Nanopore Technologies\' datasets without losing information.',
   long_description=read('README.rst'),
   author = 'Scott Gigante',
