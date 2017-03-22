@@ -17,6 +17,7 @@
 
 from multiprocessing import Pool
 import os
+import sys
 from time import sleep
 
 from picopore.parse_args import parseArgs, checkSure
@@ -28,6 +29,7 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 	func, message = chooseCompressFunc(revert, mode, fastq, summary)
 	fileList = recursiveFindFast5(inp)
 	if len(fileList) == 0:
+		log("No files found under {}".format(inp))
 		return 0
 	preSize = sum([os.path.getsize(f) for f in fileList])
 	log("{} on {} files... ".format(message, len(fileList)))
@@ -56,12 +58,19 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 		
 def runTest(args):
 	fileList = recursiveFindFast5(args.input)
-	run(False, args.mode, args.input, True, args.threads, args.group, args.prefix, args.fastq, args.summary)
-	run(True, args.mode, [getPrefixedFilename(i, args.prefix) for i in args.input], True, args.threads, args.group, None, args.fastq, args.summary)
-	for f in fileList:
-		compressedFile = getPrefixedFilename(f, args.prefix)
-		checkEquivalent(f, compressedFile)
-		os.remove(compressedFile)
+	try:
+		run(False, args.mode, args.input, True, args.threads, args.group, args.prefix, args.fastq, args.summary)
+		run(True, args.mode, [os.path.join(os.path.dirname(i), getPrefixedFilename(i, args.prefix)) for i in args.input], True, args.threads, args.group, None, args.fastq, args.summary)
+		for f in fileList:
+			compressedFile = getPrefixedFilename(f, args.prefix)
+			checkEquivalent(f, compressedFile)
+	finally:
+		for f in fileList:
+			try:
+				os.remove(getPrefixedFilename(f, args.prefix))
+			except OSError:
+				# file never created
+				pass
 	return 0
 
 def runRealtime(args):
