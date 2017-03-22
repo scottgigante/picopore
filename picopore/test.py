@@ -47,8 +47,13 @@ def recursiveCheckEquivalent(file1, file2, name):
 	attrsName = "/".join([name, "attrs"])
 	checkContents(attr1, attr2, attrsName)
 	for key, value in attr1.items():
-		if not attr2[key] == value:
-			log("Failure: {} - file1={}, file2={}".format("/".join([attrsName, key]), value, attr2[key]))
+		try:
+			if not attr2[key] == value:
+				log("Failure: {} - file1={}, file2={}".format("/".join([attrsName, key]), value, attr2[key]))
+		except ValueError as e:
+			# probably a numpy array
+			if str(e) == "The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()" and not (attr2[key] == value).all():
+				log("Failure: {} - file1={}, file2={}".format("/".join([attrsName, key]), value, attr2[key]))
 	# check subgroups / datasets
 	if isGroup(obj1):
 		checkContents(obj1, obj2)
