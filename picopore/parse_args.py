@@ -26,7 +26,8 @@ def checkTestMode(test, args):
 	if args.test:
 		if "lossless" not in args.mode:
 			raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
-		args.prefix = "picopore.test"
+		if args.prefix is None:
+			args.prefix = "picopore.test"
 	return args.test
 
 def checkInputs(args):
