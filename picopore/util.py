@@ -18,6 +18,7 @@
 from __future__ import print_function
 import os
 import numpy as np
+import glob
 
 def log(message, end='\n'):
 	print(message, end=end)
@@ -38,10 +39,7 @@ def recursiveFindFast5(inp):
 		elif os.path.isfile(path) and path.endswith(".fast5"):
 			files.append(path)
 		else:
-			dirname = os.path.dirname(path)
-			prefix = os.path.basename(path)
-			if os.path.isdir(dirname):
-				files.extend([p for p in recursiveFindFast5(os.listdir(dirname)) if prefix in os.path.basename(p)])
+			files.extend(glob.glob("{}*.fast5".format(path)))
 	return files
 
 def isType(obj, types):
@@ -64,7 +62,7 @@ def isInt(obj):
 	return isType(obj, ['int', 'int4', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint4', 'uint8', 'uint16', 'uint32', 'uint64'])
 
 def isStr(obj):
-	return isType(obj, ['str', 'string_', 'bytes_'])
+	return isType(obj, ['str', 'string_', 'bytes_', 'unicode'])
 
 def isArray(obj):
 	return isType(obj, ['list', 'ndarray', 'MaskedArray'])
@@ -116,6 +114,7 @@ def getDtype(data):
 		# TODO: is there a better way to type floats? sig figs?
 		name=type(data).__name__
 	else:
+		raise TypeError("Data type for value {} not recognised: {}".format(str(data), type(data).__name__))
 		return None
 	return np.dtype(name)
 
@@ -186,7 +185,7 @@ def uncollapseGroups(f, basegroup):
 		try:
 			f.create_group(groupname)
 		except ValueError as e:
-			if str(e) == "Unable to create group (Name already exists)":
+			if groupname in f:
 				pass
 			else:
 				raise e
