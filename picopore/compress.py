@@ -189,16 +189,19 @@ def rawCompressMinimal(f, group):
 	return rawCompress(f, group, keywords)
 
 def rawCompress(f, group, keywords):
-	paths = []
-	for kw in keywords:
-		paths.extend(findDatasets(f, group, keyword=kw))
-	for path in paths:
-		try:
-			del f[path]
-		except KeyError:
-			# duplicated in paths, already deleted
-			pass
-	return "GZIP=9"
+    if "Picopore" in f:
+        log("{} is compressed using picopore deep-lossless compression. Please use picpore --revert --mode deep-lossless before attempting raw compression.")
+    else:
+        paths = []
+        for kw in keywords:
+            paths.extend(findDatasets(f, group, keyword=kw))
+        for path in paths:
+            try:
+                del f[path]
+            except KeyError:
+                # duplicated in paths, already deleted
+                pass
+    return "GZIP=9"
 
 def compress(func, filename, group="all", prefix=None):
 	if prefix is not None:
