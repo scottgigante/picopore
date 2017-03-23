@@ -40,7 +40,10 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 		else:
 			argList = [[func, f, group, prefix] for f in fileList]
 			pool = Pool(threads)
-			pool.map(compressWrapper, argList)
+			try:
+			    pool.map(compressWrapper, argList)
+			except KeyboardInterrupt as e:
+			    raise e
 		if revert:
 			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:
