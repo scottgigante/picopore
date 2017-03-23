@@ -1,2 +1,3 @@
 h5py>2.2.0
 watchdog
+future
