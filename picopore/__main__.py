@@ -23,9 +23,9 @@ from picopore.parse_args import parseArgs, checkSure
 from picopore.util import recursiveFindFast5, log, getPrefixedFilename
 from picopore.compress import compress, chooseCompressFunc
 from picopore.test import checkEquivalent
-from picopore.multiprocess import apply_async
+from picopore.multiprocess import Multiprocessor
 
-def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False):
+def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False, multiprocessor=None):
 	func, message = chooseCompressFunc(revert, mode, fastq, summary)
 	fileList = recursiveFindFast5(inp)
 	if len(fileList) == 0:
@@ -39,7 +39,9 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 				compress(func,f, group, prefix)
 		else:
 			argList = [[func, f, group, prefix] for f in fileList]
-			apply_async(threads, compress, argList)
+			if multiprocessor is None:
+			    multiprocessor = Multiprocessor(threads)
+			multiprocessor.apply_async(compress, argList)
 		if revert:
 			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:

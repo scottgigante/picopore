@@ -21,6 +21,7 @@ from watchdog.events import PatternMatchingEventHandler
 
 from picopore.__main__ import run
 from picopore.util import log
+from picopore.multiprocess import Multiprocessor
 
 class ReadsFolder():
 	def __init__(self, args):
@@ -30,6 +31,7 @@ class ReadsFolder():
 				ignore_directories=True)
 		self.event_handler.on_created = self.on_created
 		self.observer = Observer()
+		self.multiprocessor = Multiprocessor(args.threads)
 		observedPaths = []
 		for path in args.input:
 			if os.path.isdir(path):
@@ -37,7 +39,7 @@ class ReadsFolder():
 				observedPaths.append(path)
 		log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
 		self.observer.start()
-		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary)
+		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, self.multiprocessor)
 
 	def on_created(self, event):
 		if self.args.prefix is None or not os.path.basename(event.src_path).startswith(self.args.prefix):

@@ -25,21 +25,27 @@ import signal
 def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-def apply_async(threads, func, argsList):
-    pool = multiprocessing.Pool(threads, init_worker)
-    
-    results = []
-    for args in argsList:
-        results.append(pool.apply_async(func, args=args))
+class Multiprocessor:
 
-    try:
-        [r.get() for r in results]
+    def __init__(self, threads):
+        self.pool = self.init_pool(threads)
 
-    except KeyboardInterrupt:
-        pool.terminate()
-        pool.join()
-        raise
+    def init_pool(self, threads):
+        return multiprocessing.Pool(threads, init_worker)
 
-    else:
-        pool.close()
-        pool.join()
+    def apply_async(self, func, argsList):
+        results = []
+        for args in argsList:
+            results.append(self.pool.apply_async(func, args=args))
+
+        try:
+            [r.get() for r in results]
+
+        except KeyboardInterrupt:
+            self.pool.terminate()
+            self.pool.join()
+            raise
+
+    def __del__(self):
+        self.pool.close()
+        self.pool.join()

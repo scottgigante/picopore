@@ -46,7 +46,7 @@ def testRealtime(mode, additionalArgs=None, directory="realtime"):
 	p = subprocess.Popen(args)
 	for filename in __test_files__:
 		shutil.copy(filename, directory)
-		time.sleep(2)
+		time.sleep(3)
 	p.kill()
 	shutil.rmtree(directory)
 
