@@ -190,7 +190,7 @@ def rawCompressMinimal(f, group):
 
 def rawCompress(f, group, keywords):
     if "Picopore" in f:
-        log("{} is compressed using picopore deep-lossless compression. Please use picpore --revert --mode deep-lossless before attempting raw compression.")
+        log("{} is compressed using picopore deep-lossless compression. Please use picpore --revert --mode deep-lossless before attempting raw compression.".format(f.filename))
     else:
         paths = []
         for kw in keywords:
