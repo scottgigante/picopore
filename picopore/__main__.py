@@ -15,15 +15,15 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from multiprocessing import Pool
 import os
 import sys
 from time import sleep
 
 from picopore.parse_args import parseArgs, checkSure
 from picopore.util import recursiveFindFast5, log, getPrefixedFilename
-from picopore.compress import compressWrapper, chooseCompressFunc
+from picopore.compress import compress, chooseCompressFunc
 from picopore.test import checkEquivalent
+from picopore.multiprocess import apply_async
 
 def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False):
 	func, message = chooseCompressFunc(revert, mode, fastq, summary)
@@ -36,14 +36,10 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 	if y or checkSure():
 		if threads <= 1:
 			for f in fileList:
-				compressWrapper([func,f, group, prefix])
+				compress(func,f, group, prefix)
 		else:
 			argList = [[func, f, group, prefix] for f in fileList]
-			pool = Pool(threads)
-			try:
-			    pool.map(compressWrapper, argList)
-			except KeyboardInterrupt as e:
-			    raise e
+			apply_async(threads, compress, argList)
 		if revert:
 			preStr, postStr = "Compressed size:", "Reverted size:"
 		else:

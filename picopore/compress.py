@@ -216,6 +216,3 @@ def compress(func, filename, group="all", prefix=None):
 		subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
 	except Exception as e:
 		log(str(e))
-
-def compressWrapper(args):
-	return compress(*args)
