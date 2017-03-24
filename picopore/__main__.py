@@ -58,8 +58,8 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 def runTest(args):
 	fileList = recursiveFindFast5(args.input)
 	try:
-		run(False, args.mode, args.input, True, args.threads, args.group, args.prefix, args.fastq, args.summary)
-		run(True, args.mode, [os.path.join(os.path.dirname(i), getPrefixedFilename(i, args.prefix)) for i in args.input], True, args.threads, args.group, None, args.fastq, args.summary)
+		run(False, args.mode, fileList, True, args.threads, args.group, args.prefix, args.fastq, args.summary)
+		run(True, args.mode, [getPrefixedFilename(f, args.prefix) for f in fileList], True, args.threads, args.group, None, args.fastq, args.summary)
 		for f in fileList:
 			compressedFile = getPrefixedFilename(f, args.prefix)
 			checkEquivalent(f, compressedFile)

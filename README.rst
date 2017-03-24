@@ -60,6 +60,7 @@ using ``sudo apt-get install hdf5-tools`` or similar.
 Picopore requires the following Python packages: 
 
 * ``h5py`` 
+* ``future``
 * ``watchdog`` (for real-time compression)
 
 In addition, ``h5py`` requires HDF5 1.8.4 or later (``libhdf5-dev`` or similar). Difficulties resolving dependencies of ``h5py`` can be resolved by installing from your package manager, using ``sudo apt-get install python-h5py`` or similar.
