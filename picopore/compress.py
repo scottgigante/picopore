@@ -196,11 +196,8 @@ def rawCompress(f, group, keywords):
         for kw in keywords:
             paths.extend(findDatasets(f, group, keyword=kw))
         for path in paths:
-            try:
+            if path in f:
                 del f[path]
-            except KeyError:
-                # duplicated in paths, already deleted
-                pass
     return "GZIP=9"
 
 def compress(func, filename, group="all", prefix=None):
