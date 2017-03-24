@@ -24,27 +24,27 @@ from picopore.util import log
 from picopore.multiprocess import Multiprocessor
 
 class ReadsFolder():
-	def __init__(self, args):
-		self.args = args
-		self.event_handler = PatternMatchingEventHandler(patterns=["*.fast5"],
-				ignore_patterns=[],
-				ignore_directories=True)
-		self.event_handler.on_created = self.on_created
-		self.observer = Observer()
-		self.multiprocessor = Multiprocessor(args.threads)
-		observedPaths = []
-		for path in args.input:
-			if os.path.isdir(path):
-				self.observer.schedule(self.event_handler, path, recursive=True)
-				observedPaths.append(path)
-		log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
-		self.observer.start()
-		run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, self.multiprocessor)
+    def __init__(self, args):
+        self.args = args
+        self.event_handler = PatternMatchingEventHandler(patterns=["*.fast5"],
+                ignore_patterns=[],
+                ignore_directories=True)
+        self.event_handler.on_created = self.on_created
+        self.observer = Observer()
+        self.multiprocessor = Multiprocessor(args.threads)
+        observedPaths = []
+        for path in args.input:
+            if os.path.isdir(path):
+                self.observer.schedule(self.event_handler, path, recursive=True)
+                observedPaths.append(path)
+        log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
+        self.observer.start()
+        run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, self.multiprocessor)
 
-	def on_created(self, event):
-		if self.args.prefix is None or not os.path.basename(event.src_path).startswith(self.args.prefix):
-			run(self.args.revert, self.args.mode, [event.src_path], self.args.y, self.args.threads, self.args.group, self.args.prefix, self.args.fastq, self.args.summary)
+    def on_created(self, event):
+        if self.args.prefix is None or not os.path.basename(event.src_path).startswith(self.args.prefix):
+            run(self.args.revert, self.args.mode, [event.src_path], self.args.y, self.args.threads, self.args.group, self.args.prefix, self.args.fastq, self.args.summary)
 
-	def stop(self):
-		self.observer.stop()
-		self.observer.join()
+    def stop(self):
+        self.observer.stop()
+        self.observer.join()
