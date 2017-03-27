@@ -22,7 +22,7 @@ import glob
 
 def log(message, end='\n'):
     print(message, end=end)
-    
+
 def getPrefixedFilename(filename, prefix=""):
     if prefix is None or prefix == "":
         return filename
@@ -54,7 +54,7 @@ def isType(obj, types):
 
 def isGroup(obj):
     return isType(obj, ["Group"])
-    
+
 def isDataset(obj):
     return isType(obj, ["Dataset"])
 
@@ -62,14 +62,14 @@ def isInt(obj):
     return isType(obj, ['int', 'int4', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint4', 'uint8', 'uint16', 'uint32', 'uint64'])
 
 def isStr(obj):
-    return isType(obj, ['str', 'string_', 'bytes_', 'unicode'])
+    return isType(obj, ['str', 'string_', 'bytes_', 'bytes', 'unicode'])
 
 def isArray(obj):
     return isType(obj, ['list', 'ndarray', 'MaskedArray'])
 
 def isFloat(obj):
     return isType(obj, ['float', 'float16', 'float32', 'float64'])
-    
+
 def getUIntDtype(num):
     if num < 2**8:
         name='uint8'
@@ -91,7 +91,7 @@ def getIntDtype(num):
     else:
         name='int64'
     return name
-    
+
 def getDtype(data):
     if isArray(data):
         if isInt(data[0]):
@@ -138,7 +138,7 @@ def findDatasets(f, group_id, keyword="Events", entry_point="Analyses"):
         # no analyses, dont worry
         pass
     return eventPaths
-    
+
 def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None):
     obj = f.get(path)
     if not isDataset(obj):
@@ -163,7 +163,7 @@ def rewriteDataset(f, path, compression="gzip", compression_opts=1, dataset=None
                 raise e
     for name, value in attrs.items():
         f[path].attrs[name] = value
-        
+
 def recursiveCollapseGroups(f, basegroup, path, group):
     for subname, object in group.items():
         subpath = "{}.{}".format(path, subname)
