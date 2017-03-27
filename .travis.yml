@@ -12,11 +12,11 @@ python:
   - "3.7-dev" # 3.7 development branch
   - "nightly" # currently points to 3.7-dev
 # command to install dependencies
+sudo: required
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libhdf5-dev
   - sudo apt-get install -y hdf5-tools
-
 install: "python setup.py install"
 # # command to run tests
 script: python test/test.py
