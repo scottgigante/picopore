@@ -1,5 +1,5 @@
-Picopore v 1.1.1a
-=================
+Picopore v 1.1.2
+================
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
