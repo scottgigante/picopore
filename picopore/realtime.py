@@ -27,11 +27,13 @@ from picopore.compress import chooseCompressFunc, compress
 class ReadsFolder():
     def __init__(self, args):
         self.args = args
+
         self.event_handler = PatternMatchingEventHandler(patterns=["*.fast5"],
                 ignore_patterns=[],
                 ignore_directories=True)
         self.event_handler.on_created = self.on_created
         self.event_handler.on_moved = self.on_moved
+
         self.observer = Observer()
         self.multiprocessor = Multiprocessor(args.threads)
         self.func, self.message = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary)

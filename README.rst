@@ -1,5 +1,5 @@
-Picopore v 1.1.2
-================
+Picopore v1.1.3
+===============
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
 
@@ -51,7 +51,7 @@ Currently, ``h5py`` is only available on Windows via ``conda``.
 Requirements
 ~~~~~~~~~~~~
 
-Picopore runs on Python 2.7, 3.3, 3.4, or 3.5 with development headers (``python-dev`` or similar).
+Picopore runs on Python 2.7, 3.4, 3.5, 3.6 or 3.7 with development headers (``python-dev`` or similar).
 
 Picopore requires ``h5repack`` from ``hdf5-tools``, which can be
 downloaded from https://support.hdfgroup.org/downloads/index.html or
