@@ -97,15 +97,17 @@ def parseArgs():
     parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
     parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)")
     parser.add_argument("-g", "--group", default="all", help="group number allows discrimination between different basecalling runs (Default: all)")
+    parser.add_argument("--skip-root", action=AutoBool, default=False, help="ignore files in root input directories for albacore realtime compression")
+    parser.add_argument("--print-every", type=int, default=100, help="print a dot every approximately this many files, or -1 to silence (Default: 100)", dest="print_every")
     parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
     args = parser.parse_args()
-    
+
     args.test = checkTestMode(test, args)
     args.input = checkInputs(args)
     args.realtime = checkRealtime(args)
-    
+
     return args
-    
+
 def checkSure():
     response = input("Are you sure? (yes|no): ")
     assert isinstance(response, str)

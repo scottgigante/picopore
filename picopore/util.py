@@ -19,9 +19,11 @@ from __future__ import print_function
 import os
 import numpy as np
 import glob
+import sys
 
 def log(message, end='\n'):
     print(message, end=end)
+    sys.stdout.flush()
 
 def getPrefixedFilename(filename, prefix=""):
     if prefix is None or prefix == "":
@@ -31,14 +33,14 @@ def getPrefixedFilename(filename, prefix=""):
     else:
         return os.path.join(os.path.dirname(filename), ".".join([prefix, os.path.basename(filename)]))
 
-def recursiveFindFast5(inp):
+def recursiveFindFast5(inp, skip_root=False, depth=0):
     files = []
     for path in inp:
         if os.path.isdir(path):
-            files.extend(recursiveFindFast5([os.path.join(path, i) for i in os.listdir(path)]))
-        elif os.path.isfile(path) and path.endswith(".fast5"):
+            files.extend(recursiveFindFast5([os.path.join(path, i) for i in os.listdir(path)], skip_root, depth+1))
+        elif (not skip_root or depth > 1) and os.path.isfile(path) and path.endswith(".fast5"):
             files.append(path)
-        else:
+        elif not skip_root:
             files.extend(glob.glob("{}*.fast5".format(path)))
     return files
 

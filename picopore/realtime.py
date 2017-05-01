@@ -20,8 +20,9 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from picopore.__main__ import run
-from picopore.util import log
+from picopore.util import log, getPrefixedFilename
 from picopore.multiprocess import Multiprocessor
+from picopore.compress import chooseCompressFunc, compress
 
 class ReadsFolder():
     def __init__(self, args):
@@ -30,21 +31,55 @@ class ReadsFolder():
                 ignore_patterns=[],
                 ignore_directories=True)
         self.event_handler.on_created = self.on_created
+        self.event_handler.on_moved = self.on_moved
         self.observer = Observer()
         self.multiprocessor = Multiprocessor(args.threads)
-        observedPaths = []
+        self.func, self.message = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary)
+        self.preSize = 0
+
+        self.observedPaths = []
         for path in args.input:
             if os.path.isdir(path):
                 self.observer.schedule(self.event_handler, path, recursive=True)
-                observedPaths.append(path)
+                self.observedPaths.append(path)
         log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
         self.observer.start()
-        run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, self.multiprocessor)
+        self.preSize += run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.print_every, args.skip_root, self.multiprocessor)
+
+    def add_file(self, path):
+        self.preSize += os.path.getsize(path)
+        argList = [[self.func, path, self.args.group, self.args.prefix, self.args.print_every]]
+        self.multiprocessor.apply_async(compress, argList)
 
     def on_created(self, event):
-        if self.args.prefix is None or not os.path.basename(event.src_path).startswith(self.args.prefix):
-            run(self.args.revert, self.args.mode, [event.src_path], self.args.y, self.args.threads, self.args.group, self.args.prefix, self.args.fastq, self.args.summary)
+        if self.args.skip_root and os.path.dirname(event.src_path) in self.observedPaths:
+            return 0
+        elif self.args.prefix is not None and os.path.basename(event.src_path).startswith(self.args.prefix):
+            return 0
+        else:
+            self.add_file(event.src_path)
+            return 0
+
+    def on_moved(self, event):
+        if self.args.skip_root and os.path.dirname(event.src_path) in self.observedPaths and os.path.dirname(event.dest_path) not in self.observedPaths:
+            self.add_file(event.dest_path)
 
     def stop(self):
+        log("Processing in-progress files. Press Ctrl-C again to abort.")
+        try:
+            postSize = self.multiprocessor.join()
+            log("Complete.")
+            if self.args.revert:
+                preStr, postStr = "Compressed size:", "Reverted size:"
+            else:
+                preStr, postStr = "Original size:", "Compressed size:"
+            str_len = max(len(preStr), len(postStr)) + 1
+            num_len = len(str(max(self.preSize, postSize)))
+            log("{}{}".format(preStr.ljust(str_len), str(self.preSize).rjust(num_len)))
+            log("{}{}".format(postStr.ljust(str_len), str(postSize).rjust(num_len)))
+        except KeyboardInterrupt:
+            log("Aborted.")
+            pass
+
         self.observer.stop()
         self.observer.join()

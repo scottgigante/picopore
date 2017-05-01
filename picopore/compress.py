@@ -24,7 +24,7 @@ from shutil import copyfile
 from picopore.util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
-__raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection","Events"]
+__raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection","Events","Segmentation"]
 
 def chooseCompressFunc(revert, mode, fastq, summary):
     if revert:
@@ -62,7 +62,7 @@ def chooseCompressFunc(revert, mode, fastq, summary):
     except NameError:
         log("No compression method selected")
         exit(1)
-        
+
 def indexToZero(f, path, col, name="picopore.{}_index", dataColumn=None):
     dataset = f[path]
     name = name.format(col)
@@ -98,7 +98,7 @@ def deepLosslessCompress(f, group):
                 if "picopore.start_index" not in f[eventDetectionPath].attrs.keys():
                     eventData = indexToZero(f, eventDetectionPath, "start")
                     rewriteDataset(f, eventDetectionPath, compression="gzip", compression_opts=9, dataset=eventData)
-                
+
     if __basegroup_name__ not in f:
         f.create_group(__basegroup_name__)
         for name, group in f.items():
@@ -109,7 +109,7 @@ def deepLosslessCompress(f, group):
 def deepLosslessDecompress(f, group):
     # rebuild group hierarchy
     if __basegroup_name__ in f.keys():
-        uncollapseGroups(f, f[__basegroup_name__])    
+        uncollapseGroups(f, f[__basegroup_name__])
     paths = findDatasets(f, group)
     paths = [path for path in paths if "Basecall" in path]
     sampleRate = f["UniqueGlobalKey/channel_id"].attrs["sampling_rate"]
@@ -150,7 +150,7 @@ def deepLosslessDecompress(f, group):
                 dataset = drop_fields(dataset, "start")
                 start = [i/sampleRate for i in eventData["start"]]
                 length = [i/sampleRate for i in eventData["length"]]
-                dataset = append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], length])    
+                dataset = append_fields(dataset, ["mean", "start", "stdv", "length"], [eventData["mean"], start, eventData["stdv"], length])
                 rewriteDataset(f, path, dataset=dataset)
     return losslessDecompress(f, group)
 
@@ -161,7 +161,7 @@ def losslessCompress(f, group):
     for path in paths:
         rewriteDataset(f, path, "gzip", 9)
     return "GZIP=9"
-        
+
 def losslessDecompress(f, group):
     paths = findDatasets(f, group, keyword="Events")
     paths.extend(findDatasets(f, group, keyword="Alignment"))
@@ -172,7 +172,7 @@ def losslessDecompress(f, group):
 
 def rawCompressFastqSummary(f, group):
     return rawCompress(f, group, __raw_compress_keywords__)
-    
+
 def rawCompressFastqNoSummary(f, group):
     keywords = __raw_compress_keywords__
     keywords.append("Summary")
@@ -200,7 +200,7 @@ def rawCompress(f, group, keywords):
                 del f[path]
     return "GZIP=9"
 
-def compress(func, filename, group="all", prefix=None):
+def compress(func, filename, group="all", prefix=None, print_every=100):
     if prefix is not None:
         newFilename = getPrefixedFilename(filename, prefix)
         copyfile(filename, newFilename)
@@ -211,5 +211,8 @@ def compress(func, filename, group="all", prefix=None):
             filtr = func(f, group)
         subprocess.call(["h5repack","-f",filtr,newFilename, "{}.tmp".format(newFilename)])
         subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
+        if print_every > 0 and np.random.rand() < 1.0/print_every:
+            log('.', end='')
+        return os.path.getsize(newFilename)
     except Exception as e:
         log(str(e))
