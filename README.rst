@@ -1,4 +1,4 @@
-Picopore v1.1.3
+Picopore v1.1.4
 ===============
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
@@ -72,7 +72,8 @@ Usage
 
     usage: picopore [-h] [-v] --mode {lossless,deep-lossless,raw} [--revert]
                     [--realtime | --test] [--fastq] [--summary] [--prefix PREFIX]
-                    [-y] [-t THREADS] [-g GROUP]
+                    [-y] [-t THREADS] [--skip-root]
+                    [--print-every PRINT_EVERY]
                     [input [input ...]]
 
 ::
@@ -99,9 +100,12 @@ Usage
       -y                    skip confirm step
       -t THREADS, --threads THREADS
                             number of threads (Default: 1)
-      -g GROUP, --group GROUP
-                            group number allows discrimination between different
-                            basecalling runs (Default: all)
+      --skip-root, --no-skip-root
+                            ignore files in root input directories for albacore
+                            realtime compression (Default: --no-skip-root)
+      --print-every PRINT_EVERY
+                            print a dot every approximately this many files, or -1
+                            to silence (Default: 100)
 
 It is necessary to choose one compression mode out of ``lossless``,
 ``deep-lossless``, and ``raw``.
