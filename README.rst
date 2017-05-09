@@ -119,11 +119,11 @@ this is not possible.
 ====================== ============= ======================= ============================= =============================
 Functionality           Lossless      Deep Lossless           Raw                           Raw ``--no-fastq``           
 ====================== ============= ======================= ============================= =============================
-Metrichor               ✓             ``picopore --revert``   ✓                            ✓                
-nanonetcall             ✓             ``picopore --revert``   ✓                            ✓                
-poretools fastq         ✓             ``picopore --revert``   ✓                            ``nanonetcall / Metrichor``
-poRe printfastq         ✓             ``picopore --revert``   ✓                            ``nanonetcall / Metrichor``
-nanopolish consensus    ✓             ``picopore --revert``   ``nanonetcall / Metrichor``   ``nanonetcall / Metrichor``
+Metrichor               yes           ``picopore --revert``   yes                          yes              
+nanonetcall             yes           ``picopore --revert``   yes                          yes              
+poretools fastq         yes           ``picopore --revert``   yes                          ``nanonetcall / Metrichor``
+poRe printfastq         yes           ``picopore --revert``   yes                          ``nanonetcall / Metrichor``
+nanopolish consensus    yes           ``picopore --revert``   ``nanonetcall / Metrichor``  ``nanonetcall / Metrichor``
 ====================== ============= ======================= ============================= =============================
 
 FAQs
