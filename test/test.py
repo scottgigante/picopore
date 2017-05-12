@@ -3,11 +3,12 @@ import os
 import errno
 import shutil
 import time
+import signal
 
 __test_files__ = ["sample_data/albacore_1d_original.fast5", "sample_data/metrichor_2d_original.fast5"]
 __test_runs__ = ["lossless", "deep-lossless"]
 __prefix__ = "picopore.test"
-__raw_runs__ = [["--fastq","--summary"],["--summary","--no-fastq"],["--fastq","--no-summary"],["--no-fastq","--no-summary"]]
+__raw_runs__ = [["--fastq","--summary"],["--summary","--no-fastq"],["--fastq","--no-summary"],["--no-fastq","--no-summary"], ["--manual", "Analyses"]]
 
 def mkdir(path):
     try:
@@ -36,7 +37,7 @@ def testFile(filename):
         call(["--test","--mode",run, filename])
         call(["--mode",run, filename], prefix=__prefix__)
     for run in __raw_runs__:
-        call(["--mode","raw",run[0],run[1],filename], prefix=__prefix__)
+        call(["--mode","raw"] + run + [filename], prefix=__prefix__)
 
 def testRealtime(mode, additionalArgs=None, directory="realtime"):
     mkdir(directory)
@@ -45,11 +46,11 @@ def testRealtime(mode, additionalArgs=None, directory="realtime"):
         args.extend(additionalArgs)
     args.extend(["--mode",mode,directory])
     p = subprocess.Popen(args)
-    time.sleep(3)
+    time.sleep(15)
     for filename in __test_files__:
         shutil.copy(filename, directory)
         time.sleep(3)
-    p.kill()
+    p.send_signal(signal.SIGINT)
     shutil.rmtree(directory)
 
 for filename in __test_files__:
