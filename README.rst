@@ -5,10 +5,10 @@ A tool for reducing the size of Oxford Nanopore Technologies' datasets without l
 
 If you find Picopore useful, please cite it at http://dx.doi.org/10.12688/f1000research.11022.1
 
-Options: 
+Options:
 
-* Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality; 
-* Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset; 
+* Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality;
+* Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset;
 * Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and a choice of FASTQ data, basecall summary, both or neither.
 
 Author: Scott Gigante, Walter & Eliza Hall Institute of Medical
@@ -57,9 +57,9 @@ Picopore requires ``h5repack`` from ``hdf5-tools``, which can be
 downloaded from https://support.hdfgroup.org/downloads/index.html or
 using ``sudo apt-get install hdf5-tools`` or similar.
 
-Picopore requires the following Python packages: 
+Picopore requires the following Python packages:
 
-* ``h5py`` 
+* ``h5py``
 * ``future``
 * ``watchdog`` (for real-time compression)
 
@@ -71,8 +71,8 @@ Usage
 ::
 
     usage: picopore [-h] [-v] --mode {lossless,deep-lossless,raw} [--revert]
-                    [--realtime | --test] [--fastq] [--summary] [--prefix PREFIX]
-                    [-y] [-t THREADS] [--skip-root]
+                    [--realtime | --test] [--fastq] [--summary] [--manual MANUAL]
+                    [--prefix PREFIX] [-y] [-t THREADS] [--skip-root]
                     [--print-every PRINT_EVERY]
                     [input [input ...]]
 
@@ -96,6 +96,8 @@ Usage
       --summary, --no-summary
                             retain summary data (raw mode only) (Default: --no-
                             summary)
+      --manual MANUAL       manually remove groups containing MANUAL (raw mode
+                            only)
       --prefix PREFIX       add prefix to output files to prevent overwrite
       -y                    skip confirm step
       -t THREADS, --threads THREADS
@@ -104,8 +106,8 @@ Usage
                             ignore files in root input directories for albacore
                             realtime compression (Default: --no-skip-root)
       --print-every PRINT_EVERY
-                            print a dot every approximately this many files, or -1
-                            to silence (Default: 100)
+                            print a dot every approximately PRINT_EVERY files, or
+                            -1 to silence (Default: 100)
 
 It is necessary to choose one compression mode out of ``lossless``,
 ``deep-lossless``, and ``raw``.
@@ -121,10 +123,10 @@ unimpeded, and the process required to recover the necessary data if
 this is not possible.
 
 ====================== ============= ======================= ============================= =============================
-Functionality           Lossless      Deep Lossless           Raw                           Raw ``--no-fastq``           
+Functionality           Lossless      Deep Lossless           Raw                           Raw ``--no-fastq``
 ====================== ============= ======================= ============================= =============================
-Metrichor               yes           ``picopore --revert``   yes                          yes              
-nanonetcall             yes           ``picopore --revert``   yes                          yes              
+Metrichor               yes           ``picopore --revert``   yes                          yes
+nanonetcall             yes           ``picopore --revert``   yes                          yes
 poretools fastq         yes           ``picopore --revert``   yes                          ``nanonetcall / Metrichor``
 poRe printfastq         yes           ``picopore --revert``   yes                          ``nanonetcall / Metrichor``
 nanopolish consensus    yes           ``picopore --revert``   ``nanonetcall / Metrichor``  ``nanonetcall / Metrichor``
@@ -156,7 +158,7 @@ Lossless
 ^^^^^^^^
 
 Lossless compression uses HDF5's builtin compression, so all existing
-fast5 tools will work seamlessly. 
+fast5 tools will work seamlessly.
 
 - Use case: power users who wish to reduce server storage footprint
 
@@ -165,7 +167,7 @@ Deep Lossless
 
 Deep lossless compression modifies the structure of your fast5 file: any
 data extraction tools will not work until you run
-``python picopore.py --revert --mode deep-lossless [input]``. 
+``python picopore.py --revert --mode deep-lossless [input]``.
 
 - Use case: power users who wish to reduce the size of their files during data transfer, or for long-term storage
 
@@ -178,9 +180,9 @@ squiggle-space data are ``nanopolish``, ``nanoraw`` and
 ``nanonettrain``. If you do not intend on using these tools, your tools
 will work as before. If you do intend to use these tools, the raw signal
 is retained, and you can resubmit the files for basecalling to generate
-new squiggle-space data. 
+new squiggle-space data.
 
-- Use case: end users who are only interested in using the FASTQ data 
+- Use case: end users who are only interested in using the FASTQ data
 - Use case: power users running local basecalling with limited local disk space, who wish to use FASTQ immediately and will submit reads to Metrichor at a later date
 
 Raw ``--no-fastq``
@@ -188,7 +190,7 @@ Raw ``--no-fastq``
 
 Minimal compression removes all data not required to rerun basecalling
 on the fast5 files. This is only recommended for long-term storage, and
-requires files to be re-basecalled for any data to be retrieved. 
+requires files to be re-basecalled for any data to be retrieved.
 
 - Use case: users storing historical runs for archive purposes, with no short-term plans to use these reads
 
