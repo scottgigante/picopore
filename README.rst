@@ -96,7 +96,7 @@ Usage
       --summary, --no-summary
                             retain summary data (raw mode only) (Default: --no-
                             summary)
-      --manual MANUAL       manually remove groups containing MANUAL (raw mode
+      --manual MANUAL       manually remove groups whose names contain MANUAL (raw mode
                             only)
       --prefix PREFIX       add prefix to output files to prevent overwrite
       -y                    skip confirm step
