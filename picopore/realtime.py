@@ -22,7 +22,7 @@ from watchdog.events import PatternMatchingEventHandler
 from picopore.__main__ import run
 from picopore.util import log, getPrefixedFilename
 from picopore.multiprocess import Multiprocessor
-from picopore.compress import chooseCompressFunc, compress
+from picopore.compress import chooseCompressFunc
 
 class ReadsFolder():
     def __init__(self, args):
@@ -36,7 +36,7 @@ class ReadsFolder():
 
         self.observer = Observer()
         self.multiprocessor = Multiprocessor(args.threads)
-        self.func, self.message = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary)
+        self.compress, self.message = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary, args.manual)
         self.preSize = 0
 
         self.observedPaths = []
@@ -46,12 +46,12 @@ class ReadsFolder():
                 self.observedPaths.append(path)
         log("Monitoring {} in real time. Press Ctrl+C to exit.".format(", ".join(self.args.input)))
         self.observer.start()
-        self.preSize += run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.print_every, args.skip_root, self.multiprocessor)
+        self.preSize += run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every, args.skip_root, self.multiprocessor)
 
     def add_file(self, path):
         self.preSize += os.path.getsize(path)
-        argList = [[self.func, path, self.args.group, self.args.prefix, self.args.print_every]]
-        self.multiprocessor.apply_async(compress, argList)
+        argList = [[path, self.args.group, self.args.prefix, self.args.print_every]]
+        self.multiprocessor.apply_async(self.compress, argList)
 
     def on_created(self, event):
         if self.args.skip_root and os.path.dirname(event.src_path) in self.observedPaths:

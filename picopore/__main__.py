@@ -21,12 +21,12 @@ from time import sleep
 
 from picopore.parse_args import parseArgs, checkSure
 from picopore.util import recursiveFindFast5, log, getPrefixedFilename
-from picopore.compress import compress, chooseCompressFunc
+from picopore.compress import chooseCompressFunc
 from picopore.test import checkEquivalent
 from picopore.multiprocess import Multiprocessor
 
-def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False, print_every=100, skip_root=False, multiprocessor=None):
-    func, message = chooseCompressFunc(revert, mode, fastq, summary)
+def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False, manual=None, print_every=100, skip_root=False, multiprocessor=None):
+    compress, message = chooseCompressFunc(revert, mode, fastq, summary, manual)
     fileList = recursiveFindFast5(inp, skip_root)
     if len(fileList) == 0:
         log("No files found under {}".format(inp))
@@ -37,9 +37,9 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
     if y or checkSure():
         if threads <= 1 and multiprocessor is None:
             for f in fileList:
-                postSize += compress(func,f, group, prefix, print_every)
+                postSize += compress(f, group, prefix, print_every)
         else:
-            argList = [[func, f, group, prefix, print_every] for f in fileList]
+            argList = [[f, group, prefix, print_every] for f in fileList]
             if multiprocessor is None:
                 multiprocessor = Multiprocessor(threads)
             multiprocessor.apply_async(compress, argList)
@@ -60,13 +60,16 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
         exit(1)
 
 def runTest(args):
+    exitcode=1
     fileList = recursiveFindFast5(args.input, args.skip_root)
     try:
-        run(False, args.mode, fileList, True, args.threads, args.group, args.prefix, args.fastq, args.summary, args.print_every)
-        run(True, args.mode, [getPrefixedFilename(f, args.prefix) for f in fileList], True, args.threads, args.group, None, args.fastq, args.summary, args.print_every)
+        run(False, args.mode, fileList, True, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every)
+        run(True, args.mode, [getPrefixedFilename(f, args.prefix) for f in fileList], True, args.threads, args.group, None, args.fastq, args.summary, args.manual, args.print_every)
         for f in fileList:
             compressedFile = getPrefixedFilename(f, args.prefix)
             exitcode = checkEquivalent(f, compressedFile)
+    except Exception as e:
+        log(str(e))
     finally:
         for f in fileList:
             try:
@@ -94,7 +97,7 @@ def main():
     elif args.realtime:
         exitcode = runRealtime(args)
     else:
-        exitcode = run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.print_every, args.skip_root)
+        exitcode = run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every, args.skip_root)
     return exitcode
 
 if __name__ == "__main__":

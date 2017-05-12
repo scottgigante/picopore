@@ -20,13 +20,17 @@ import h5py
 import os
 from numpy.lib.recfunctions import drop_fields, append_fields
 from shutil import copyfile
+from functools import partial
 
 from picopore.util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
 
 __basegroup_name__ = "Picopore"
 __raw_compress_keywords__ = ["Alignment","Log","Configuration","HairpinAlign","Calibration_Strand","Hairpin_Split","EventDetection","Events","Segmentation"]
+__raw_compress_summary__ = ["Summary"]
+__raw_compress_fastq__ = ["BaseCalled"]
+__raw_compress_fastq_summary__ = ["Basecall"]
 
-def chooseCompressFunc(revert, mode, fastq, summary):
+def chooseCompressFunc(revert, mode, fastq, summary, manual):
     if revert:
         if mode == 'lossless':
             func = losslessDecompress
@@ -45,20 +49,24 @@ def chooseCompressFunc(revert, mode, fastq, summary):
             func = deepLosslessCompress
             name = "Performing deep lossless compression"
         elif mode == 'raw':
+            keywords = __raw_compress_keywords__
             if fastq and summary:
-                func = rawCompressFastqSummary
                 name = "Performing raw compression with FASTQ and summary"
             elif fastq:
-                func = rawCompressFastqNoSummary
+                keywords += __raw_compress_summary__
                 name = "Performing raw compression with FASTQ and no summary"
             elif summary:
-                func = rawCompressSummaryNoFastq
+                keywords += __raw_compress_fastq__
                 name = "Performing raw compression with summary and no FASTQ"
             else:
-                func = rawCompressMinimal
+                keywords += __raw_compress_fastq_summary__
                 name = "Performing raw compression with no summary and no FASTQ"
+            if manual is not None:
+                name += " and manually removing " + manual
+                keywords += [manual]
+            func = partial(rawCompress, keywords=keywords)
     try:
-        return func, name
+        return partial(compress, func), name
     except NameError:
         log("No compression method selected")
         exit(1)
@@ -170,24 +178,6 @@ def losslessDecompress(f, group):
         rewriteDataset(f, path)
     return "GZIP=1"
 
-def rawCompressFastqSummary(f, group):
-    return rawCompress(f, group, __raw_compress_keywords__)
-
-def rawCompressFastqNoSummary(f, group):
-    keywords = __raw_compress_keywords__
-    keywords.append("Summary")
-    return rawCompress(f, group, keywords)
-
-def rawCompressSummaryNoFastq(f, group):
-    keywords = __raw_compress_keywords__
-    keywords.append("BaseCalled")
-    return rawCompress(f, group, keywords)
-
-def rawCompressMinimal(f, group):
-    keywords = __raw_compress_keywords__
-    keywords.append("Analyses")
-    return rawCompress(f, group, keywords)
-
 def rawCompress(f, group, keywords):
     if "Picopore" in f:
         log("{} is compressed using picopore deep-lossless compression. Please use picpore --revert --mode deep-lossless before attempting raw compression.".format(f.filename))
@@ -198,6 +188,12 @@ def rawCompress(f, group, keywords):
         for path in paths:
             if path in f:
                 del f[path]
+        try:
+            if len(f["Analyses"].keys()) == 0:
+                del f["Analyses"]
+        except KeyError:
+            # no analyses, no worries
+            pass
     return "GZIP=9"
 
 def compress(func, filename, group="all", prefix=None, print_every=100):

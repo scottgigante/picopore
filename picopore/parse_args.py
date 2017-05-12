@@ -93,11 +93,12 @@ def parseArgs():
     test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (lossless modes only)")
     parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
     parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only)")
+    parser.add_argument("--manual", default=None, help="manually remove groups containing MANUAL (raw mode only)")
     parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
     parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
     parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)")
     parser.add_argument("--skip-root", action=AutoBool, default=False, help="ignore files in root input directories for albacore realtime compression")
-    parser.add_argument("--print-every", type=int, default=100, help="print a dot every approximately this many files, or -1 to silence (Default: 100)", dest="print_every")
+    parser.add_argument("--print-every", type=int, default=100, help="print a dot every approximately PRINT_EVERY files, or -1 to silence (Default: 100)", dest="print_every")
     parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
     args = parser.parse_args()
 
