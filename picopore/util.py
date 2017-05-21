@@ -20,6 +20,7 @@ import os
 import numpy as np
 import glob
 import sys
+import re
 
 def log(message, end='\n'):
     print(message, end=end)
@@ -125,7 +126,7 @@ def recursiveFindDatasets(group, keyword):
     if isGroup(group):
         for subgroup in group.values():
             eventPaths.extend(recursiveFindDatasets(subgroup, keyword))
-    if keyword in group.name:
+    if re.search(keyword, group.name) is not None:
         eventPaths.append(group.name)
     return eventPaths
 

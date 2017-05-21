@@ -30,40 +30,45 @@ __raw_compress_summary__ = ["Summary"]
 __raw_compress_fastq__ = ["BaseCalled"]
 __raw_compress_fastq_summary__ = ["Basecall"]
 
-def chooseCompressFunc(revert, mode, fastq, summary, manual):
+def chooseCompressFunc(revert, mode, fastq, summary, manual, realtime=False):
+    name = "Performing "
+    if realtime:
+        name += "real time "
     if revert:
         if mode == 'lossless':
             func = losslessDecompress
-            name = "Performing lossless decompression"
+            name += "lossless decompression"
         elif mode == 'deep-lossless':
             func = deepLosslessDecompress
-            name = "Performing deep lossless decompression"
+            name += "deep lossless decompression"
         else:
             log("Unable to revert raw files. Please use a basecaller instead.")
             exit(1)
     else:
         if mode == 'lossless':
             func = losslessCompress
-            name = "Performing lossless compression"
+            name += "lossless compression"
         elif mode == 'deep-lossless':
             func = deepLosslessCompress
-            name = "Performing deep lossless compression"
+            name += "deep lossless compression"
         elif mode == 'raw':
-            keywords = __raw_compress_keywords__
-            if fastq and summary:
-                name = "Performing raw compression with FASTQ and summary"
-            elif fastq:
-                keywords += __raw_compress_summary__
-                name = "Performing raw compression with FASTQ and no summary"
-            elif summary:
-                keywords += __raw_compress_fastq__
-                name = "Performing raw compression with summary and no FASTQ"
-            else:
-                keywords += __raw_compress_fastq_summary__
-                name = "Performing raw compression with no summary and no FASTQ"
+            name += "raw compression "
             if manual is not None:
-                name += " and manually removing " + manual
-                keywords += [manual]
+                name += "with manual keyword " + manual
+                keywords = [manual]
+            else:
+                keywords = __raw_compress_keywords__
+                if fastq and summary:
+                    name += "with FASTQ and summary"
+                elif fastq:
+                    keywords += __raw_compress_summary__
+                    name += "with FASTQ and no summary"
+                elif summary:
+                    keywords += __raw_compress_fastq__
+                    name += "with summary and no FASTQ"
+                else:
+                    keywords += __raw_compress_fastq_summary__
+                    name += "with no summary and no FASTQ"
             func = partial(rawCompress, keywords=keywords)
     try:
         return partial(compress, func), name

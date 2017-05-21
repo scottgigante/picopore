@@ -96,8 +96,8 @@ Usage
       --summary, --no-summary
                             retain summary data (raw mode only) (Default: --no-
                             summary)
-      --manual MANUAL       manually remove groups whose names contain MANUAL (raw mode
-                            only)
+      --manual MANUAL       manually remove only groups whose paths contain MANUAL (raw
+                            mode only, regular expressions permitted, overrides defaults)
       --prefix PREFIX       add prefix to output files to prevent overwrite
       -y                    skip confirm step
       -t THREADS, --threads THREADS
@@ -113,6 +113,11 @@ It is necessary to choose one compression mode out of ``lossless``,
 ``deep-lossless``, and ``raw``.
 
 Note that only ``lossless`` and ``deep-lossless`` are options for ``--revert``.
+
+For ``--manual`` raw compression, the entire group path is used for matching. For example,
+you could use the command ``picopore --mode raw --manual 1D.*Events [...]`` to remove the
+groups ``/Analyses/Basecall_1D_000/BaseCalled_template/Events`` and
+``/Analyses/Basecall_1D_000/BaseCalled_complement/Events``.
 
 Compression Modes
 -----------------

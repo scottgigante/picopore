@@ -21,6 +21,7 @@ from builtins import input
 
 from picopore.version import __version__
 from picopore.util import log
+from picopore.compress import chooseCompressFunc
 
 def checkTestMode(test, args):
     if args.test:
@@ -45,7 +46,8 @@ def checkInputs(args):
 
 def checkRealtime(args):
     if args.realtime:
-        log("Performing real time {} compression. ".format(args.mode),end='')
+        _, name = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary, args.manual, args.realtime)
+        log(name + "...",end='')
         if args.y:
             print('')
             return True
@@ -93,7 +95,7 @@ def parseArgs():
     test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (lossless modes only)")
     parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
     parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only)")
-    parser.add_argument("--manual", default=None, help="manually remove groups whose names contain MANUAL (raw mode only)")
+    parser.add_argument("--manual", default=None, help="manually remove only groups whose paths contain MANUAL (raw mode only, regular expressions permitted, overrides defaults)")
     parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
     parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
     parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)")

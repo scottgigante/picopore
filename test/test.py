@@ -46,7 +46,7 @@ def testRealtime(mode, additionalArgs=None, directory="realtime"):
         args.extend(additionalArgs)
     args.extend(["--mode",mode,directory])
     p = subprocess.Popen(args)
-    time.sleep(15)
+    time.sleep(5)
     for filename in __test_files__:
         shutil.copy(filename, directory)
         time.sleep(3)
