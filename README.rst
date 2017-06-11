@@ -8,8 +8,8 @@ If you find Picopore useful, please cite it at http://dx.doi.org/10.12688/f1000r
 Options:
 
 * Raw compression: reduces footprint by removing event detection and basecall data, leaving only raw signal, configuration data and a choice of FASTQ data, basecall summary, both or neither;
-* Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality; (NOTE: as of May 2017, Oxford Nanopore Technologies implemented all compression strategies used in Picopore's lossless compression. Recently basecalled files will therefore not benefit from this compression.)
-* Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset. (NOTE: deep lossless compression will have the greatest impact on 2D datasets. Further work to implement 1D^2 compression is in progress.)
+* Lossless compression: reduces footprint without reducing the ability to use other nanopore tools by using HDF5's inbuilt gzip functionality; *(NOTE: as of May 2017, Oxford Nanopore Technologies implemented all compression strategies used in Picopore's lossless compression. Recently basecalled files will therefore not benefit from this compression.)*
+* Deep lossless compression: reduces footprint without removing any data by indexing basecalled dataset to the event detection dataset. *(NOTE: deep lossless compression will have the greatest impact on 2D datasets. Further work to implement 1D^2 compression is in progress.)*
 
 Author: Scott Gigante, Walter & Eliza Hall Institute of Medical
 Research. Contact: `Email <mailto:gigante.s@wehi.edu.au>`_, `Twitter <http://www.twitter.com/scottgigante>`_
