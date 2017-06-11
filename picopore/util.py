@@ -43,6 +43,8 @@ def recursiveFindFast5(inp, skip_root=False, depth=0):
             files.append(path)
         elif not skip_root:
             files.extend(glob.glob("{}*.fast5".format(path)))
+    if depth == 0 and len(files) == 0:
+        log("No files found under {}".format(', '.join(inp)))
     return files
 
 def isType(obj, types):

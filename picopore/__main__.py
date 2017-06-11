@@ -29,7 +29,6 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
     compress, message = chooseCompressFunc(revert, mode, fastq, summary, manual)
     fileList = recursiveFindFast5(inp, skip_root)
     if len(fileList) == 0:
-        log("No files found under {}".format(inp))
         return 0
     preSize = sum([os.path.getsize(f) for f in fileList])
     postSize = 0
@@ -62,6 +61,8 @@ def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=T
 def runTest(args):
     exitcode=1
     fileList = recursiveFindFast5(args.input, args.skip_root)
+    if len(fileList) == 0:
+        return 0
     try:
         run(False, args.mode, fileList, True, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every)
         run(True, args.mode, [getPrefixedFilename(f, args.prefix) for f in fileList], True, args.threads, args.group, None, args.fastq, args.summary, args.manual, args.print_every)
