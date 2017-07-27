@@ -1,3 +1,4 @@
+from __future__ import print_function
 import subprocess
 import os
 import errno
@@ -24,6 +25,7 @@ def call(additionalArgs, prefix=None):
     if prefix is not None:
         args.extend(["--prefix",prefix])
     args.extend(additionalArgs)
+    print(" ".join(args))
     p = subprocess.call(args)
     if prefix is not None:
         filename = args[-1]
@@ -40,16 +42,18 @@ def testFile(filename):
         call(["--mode","raw"] + run + [filename], prefix=__prefix__)
 
 def testRealtime(mode, additionalArgs=None, directory="realtime"):
+    __waittime = 10
     mkdir(directory)
     args = ["python","-m","picopore","-y","--realtime","--print-every","1"]
     if additionalArgs is not None:
         args.extend(additionalArgs)
     args.extend(["--mode",mode,directory])
+    print(" ".join(args))
     p = subprocess.Popen(args)
-    time.sleep(5)
+    time.sleep(__waittime)
     for filename in __test_files__:
         shutil.copy(filename, directory)
-        time.sleep(3)
+        time.sleep(__waittime)
     p.send_signal(signal.SIGINT)
     shutil.rmtree(directory)
 

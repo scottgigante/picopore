@@ -19,7 +19,6 @@ import numpy as np
 import h5py
 import os
 from numpy.lib.recfunctions import drop_fields, append_fields
-from shutil import copyfile
 from functools import partial
 
 from picopore.util import log, isGroup, getDtype, findDatasets, rewriteDataset, recursiveCollapseGroups, uncollapseGroups, getPrefixedFilename
@@ -201,19 +200,13 @@ def rawCompress(f, group, keywords):
             pass
     return "GZIP=9"
 
-def compress(func, filename, group="all", prefix=None, print_every=100):
-    if prefix is not None:
-        newFilename = getPrefixedFilename(filename, prefix)
-        copyfile(filename, newFilename)
-    else:
-        newFilename = filename
+def compress(func, filename, group="all"):
     try:
-        with h5py.File(newFilename, 'r+') as f:
+        with h5py.File(filename, 'r+') as f:
             filtr = func(f, group)
-        subprocess.call(["h5repack","-f",filtr,newFilename, "{}.tmp".format(newFilename)])
-        subprocess.call(["mv","{}.tmp".format(newFilename),newFilename])
-        if print_every > 0 and np.random.rand() < 1.0/print_every:
-            log('.', end='')
-        return os.path.getsize(newFilename)
+        subprocess.call(["h5repack","-f",filtr,filename, "{}.tmp".format(filename)])
+        subprocess.call(["mv","{}.tmp".format(filename),filename])
+        return os.path.getsize(filename)
     except Exception as e:
-        log(str(e))
+        log("ERROR: " + str(e))
+        return None

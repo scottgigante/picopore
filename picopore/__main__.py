@@ -15,91 +15,18 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
-import sys
-from time import sleep
-
-from picopore.parse_args import parseArgs, checkSure
-from picopore.util import recursiveFindFast5, log, getPrefixedFilename
-from picopore.compress import chooseCompressFunc
-from picopore.test import checkEquivalent
-from picopore.multiprocess import Multiprocessor
-
-def run(revert, mode, inp, y=False, threads=1, group="all", prefix=None, fastq=True, summary=False, manual=None, print_every=100, skip_root=False, multiprocessor=None):
-    compress, message = chooseCompressFunc(revert, mode, fastq, summary, manual)
-    fileList = recursiveFindFast5(inp, skip_root)
-    if len(fileList) == 0:
-        return 0
-    preSize = sum([os.path.getsize(f) for f in fileList])
-    postSize = 0
-    log("{} on {} files... ".format(message, len(fileList)))
-    if y or checkSure():
-        if threads <= 1 and multiprocessor is None:
-            for f in fileList:
-                postSize += compress(f, group, prefix, print_every)
-        else:
-            argList = [[f, group, prefix, print_every] for f in fileList]
-            if multiprocessor is None:
-                multiprocessor = Multiprocessor(threads)
-            multiprocessor.apply_async(compress, argList)
-            postSize = multiprocessor.join()
-        if revert:
-            preStr, postStr = "Compressed size:", "Reverted size:"
-        else:
-            preStr, postStr = "Original size:", "Compressed size:"
-        log("Complete.")
-
-        str_len = max(len(preStr), len(postStr)) + 1
-        num_len = len(str(max(preSize, postSize)))
-        log("{}{}".format(preStr.ljust(str_len), str(preSize).rjust(num_len)))
-        log("{}{}".format(postStr.ljust(str_len), str(postSize).rjust(num_len)))
-        return preSize
-    else:
-        log("User cancelled. Exiting.")
-        exit(1)
-
-def runTest(args):
-    exitcode=1
-    fileList = recursiveFindFast5(args.input, args.skip_root)
-    if len(fileList) == 0:
-        return 0
-    try:
-        run(False, args.mode, fileList, True, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every)
-        run(True, args.mode, [getPrefixedFilename(f, args.prefix) for f in fileList], True, args.threads, args.group, None, args.fastq, args.summary, args.manual, args.print_every)
-        for f in fileList:
-            compressedFile = getPrefixedFilename(f, args.prefix)
-            exitcode = checkEquivalent(f, compressedFile)
-    except Exception as e:
-        log(str(e))
-    finally:
-        for f in fileList:
-            try:
-                os.remove(getPrefixedFilename(f, args.prefix))
-            except OSError:
-                # file never created
-                pass
-    return exitcode
-
-def runRealtime(args):
-    from picopore.realtime import ReadsFolder
-    readsFolder = ReadsFolder(args)
-    try:
-        while True:
-            sleep(1)
-    except KeyboardInterrupt:
-        log("\nExiting Picopore.")
-    readsFolder.stop()
-    return 0
+from picopore.parse_args import parseArgs
+from picopore.runner import *
 
 def main():
     args = parseArgs()
     if args.test:
-        exitcode = runTest(args)
+        runner = PicoporeTestRunner(args)
     elif args.realtime:
-        exitcode = runRealtime(args)
+        runner = PicoporeRealtimeRunner(args)
     else:
-        exitcode = run(args.revert, args.mode, args.input, args.y, args.threads, args.group, args.prefix, args.fastq, args.summary, args.manual, args.print_every, args.skip_root)
-    return exitcode
+        runner = PicoporeCompressionRunner(args)
+    return runner.execute()
 
 if __name__ == "__main__":
     exit(main())

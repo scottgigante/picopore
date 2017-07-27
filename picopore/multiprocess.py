@@ -34,13 +34,24 @@ class Multiprocessor:
     def init_pool(self, threads):
         return multiprocessing.Pool(threads, init_worker)
 
-    def apply_async(self, func, argsList):
-        for args in argsList:
-            self.results.append(self.pool.apply_async(func, args=args))
+    def apply_async(self, func, argList):
+        for arg in argList:
+            self.results.append(self.pool.apply_async(func, args=[arg]))
 
     def join(self):
         try:
-            return sum([r.get() for r in self.results])
+            return [r.get() for r in self.results]
+
+        except KeyboardInterrupt:
+            self.pool.terminate()
+            self.pool.join()
+            raise
+
+    def wait(self):
+        try:
+            for r in self.results:
+                r.wait()
+            return 0
 
         except KeyboardInterrupt:
             self.pool.terminate()

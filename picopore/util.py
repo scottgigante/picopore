@@ -132,7 +132,7 @@ def recursiveFindDatasets(group, keyword):
         eventPaths.append(group.name)
     return eventPaths
 
-def findDatasets(f, group_id, keyword="Events", entry_point="Analyses"):
+def findDatasets(f, group_id="all", keyword="Events", entry_point="Analyses"):
     eventPaths = []
     try:
         analyses = f.get(entry_point)
