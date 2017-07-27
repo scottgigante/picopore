@@ -90,7 +90,8 @@ class AbstractPicoporeRunner(object):
             exit(1)
 
     def execute(self):
-        return self.run()
+        self.run()
+        return 0
 
 class PicoporeCompressionRunner(AbstractPicoporeRunner):
 
@@ -153,10 +154,11 @@ class PicoporeTestRunner(PicoporeCompressionRunner):
             self.fileList = self.getReversionFileList()
             self.prefix = None
             self.run()
+            exitcode = 0
             for i in range(len(self.fileList)):
-                exitcode = checkEquivalent(self.originalFileList[i], self.fileList[i])
+                exitcode += checkEquivalent(self.originalFileList[i], self.fileList[i])
         except Exception as e:
-            log(str(e))
+            log("ERROR: " + str(e))
         finally:
             for f in self.fileList:
                 try:
