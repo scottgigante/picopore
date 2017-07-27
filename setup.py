@@ -15,7 +15,9 @@ if sys.version_info[:2] < (2,7) or (3,0) <= sys.version_info[:2] < (3,4):
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    with open(os.path.join(os.path.dirname(__file__), fname), 'r') as handle:
+        data = handle.read()
+    return data
 
 setup(
   name = 'picopore',
@@ -36,6 +38,7 @@ setup(
 		'Topic :: Scientific/Engineering :: Bio-Informatics'
 		],
   entry_points = {
-        'console_scripts': ['picopore = picopore.__main__:main'],
+        'console_scripts': ['picopore = picopore.__main__:main',
+                            'picopore-rename = picopore.rename:main'],
     },
 )
