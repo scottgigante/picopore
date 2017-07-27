@@ -123,22 +123,25 @@ def getDtype(data):
         return None
     return np.dtype(name)
 
-def recursiveFindDatasets(group, keyword):
+def recursiveFindDatasets(group, keyword, match_child):
     eventPaths = []
     if isGroup(group):
         for subgroup in group.values():
-            eventPaths.extend(recursiveFindDatasets(subgroup, keyword))
-    if re.search(keyword, group.name) is not None:
+            eventPaths.extend(recursiveFindDatasets(subgroup, keyword, match_child))
+    name = group.name
+    if match_child:
+        name = name.split("/")[-1]
+    if re.search(keyword, name) is not None:
         eventPaths.append(group.name)
     return eventPaths
 
-def findDatasets(f, group_id="all", keyword="Events", entry_point="Analyses"):
+def findDatasets(f, group_id="all", keyword="Events", entry_point="Analyses", match_child=False):
     eventPaths = []
     try:
         analyses = f.get(entry_point)
         for group in analyses.values():
             if group_id == "all" or group.endswith(group_id):
-                eventPaths.extend(recursiveFindDatasets(group, keyword))
+                eventPaths.extend(recursiveFindDatasets(group, keyword, match_child))
     except AttributeError:
         # no analyses, dont worry
         pass

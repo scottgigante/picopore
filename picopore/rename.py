@@ -16,15 +16,17 @@
 """
 
 import re
+import functools
+import h5py
 
 from picopore.parse_args import parseRenameArgs
-from picopore.runner import PicoporeAbstractRunner
-from picopore.util import findDatasets
+from picopore.runner import AbstractPicoporeRunner
+from picopore.util import findDatasets, log
 
 def rename(filename, pattern, replacement):
     try:
         with h5py.File(filename, 'r+') as f:
-            for path in findDatasets(f, entry_point="/", keyword=pattern):
+            for path in findDatasets(f, entry_point="/", keyword=pattern, match_child=True):
                 newPath = re.sub(pattern, replacement, path)
                 f[newPath] = f[path]
                 del f[path]
