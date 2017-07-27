@@ -32,14 +32,16 @@ def call(additionalArgs, prefix=None):
         dirname = os.path.dirname(filename)
         basename = os.path.basename(filename)
         os.remove(os.path.join(dirname,".".join([prefix,basename])))
+    return p
 
 def testFile(filename):
     result = 0
     for run in __test_runs__:
-        call(["--test","--mode",run, filename])
-        call(["--mode",run, filename], prefix=__prefix__)
+        result += call(["--test","--mode",run, filename])
+        result += call(["--mode",run, filename], prefix=__prefix__)
     for run in __raw_runs__:
-        call(["--mode","raw"] + run + [filename], prefix=__prefix__)
+        result += call(["--mode","raw"] + run + [filename], prefix=__prefix__)
+    return result
 
 def testRealtime(mode, additionalArgs=None, directory="realtime"):
     __waittime = 10
@@ -57,11 +59,14 @@ def testRealtime(mode, additionalArgs=None, directory="realtime"):
     p.send_signal(signal.SIGINT)
     p.wait()
     shutil.rmtree(directory)
+    return p.returncode
 
+exitcode = 0
 for filename in __test_files__:
-    testFile(filename)
+    exitcode += testFile(filename)
 
 for mode in __test_runs__:
-    testRealtime(mode)
+    exitcode += testRealtime(mode)
 for mode in __raw_runs__:
-    testRealtime("raw", additionalArgs=mode)
+    exitcode += testRealtime("raw", additionalArgs=mode)
+exit(exitcode)
