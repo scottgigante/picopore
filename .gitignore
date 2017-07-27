@@ -4,3 +4,4 @@ build
 dist
 picopore/__pycache__
 picopore/*.pyc
+.*
