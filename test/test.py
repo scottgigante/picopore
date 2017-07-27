@@ -55,6 +55,7 @@ def testRealtime(mode, additionalArgs=None, directory="realtime"):
         shutil.copy(filename, directory)
         time.sleep(__waittime)
     p.send_signal(signal.SIGINT)
+    p.wait()
     shutil.rmtree(directory)
 
 for filename in __test_files__:
