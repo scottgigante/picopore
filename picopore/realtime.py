@@ -83,7 +83,7 @@ class PicoporeRealtimeRunner(PicoporeCompressionRunner):
         _, name = chooseCompressFunc(self.revert, self.mode, self.fastq, self.summary, self.manual, realtime=True)
         log(name + "...",end='')
         if self.y:
-            print()
+            log()
         elif checkSure():
             self.y = True
         else:

@@ -22,7 +22,7 @@ import glob
 import sys
 import re
 
-def log(message, end='\n'):
+def log(message='', end='\n'):
     print(message, end=end)
     sys.stdout.flush()
 
