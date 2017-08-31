@@ -16,7 +16,6 @@
 """
 import os
 import sys
-from time import sleep
 import functools
 from shutil import copyfile
 import numpy as np

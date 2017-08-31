@@ -16,13 +16,14 @@
 """
 
 import os
+from time import sleep
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from picopore.multiprocess import Multiprocessor
 from picopore.runner import PicoporeCompressionRunner
 from picopore.compress import chooseCompressFunc
-from picopore.parse_args import parseArgs
+from picopore.parse_args import parseArgs, checkSure
 from picopore.util import log
 
 class ReadsFolder(object):
