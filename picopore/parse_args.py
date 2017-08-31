@@ -28,7 +28,7 @@ from picopore.util import log
 from picopore.compress import chooseCompressFunc
 
 def checkDeprecatedArgs():
-    args = sys.argv[1:].split()
+    args = sys.argv[1:]
     if "--realtime" in args:
         args.remove('--realtime')
         warnings.warn("picopore --realtime will be deprecated in 1.3.0. Use picopore-realtime instead.",FutureWarning)
