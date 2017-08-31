@@ -1,4 +1,4 @@
-Picopore v1.1.5
+Picopore v1.2.0
 ===============
 
 A tool for reducing the size of Oxford Nanopore Technologies' datasets without losing information.
@@ -70,10 +70,16 @@ Usage
 
 ::
 
-    usage: picopore [-h] [-v] --mode {lossless,deep-lossless,raw} [--revert]
-                    [--realtime | --test] [--fastq] [--summary] [--manual MANUAL]
-                    [--prefix PREFIX] [-y] [-t THREADS] [--skip-root]
-                    [--print-every PRINT_EVERY]
+    commands: picopore
+              picopore-realtime      monitors a directory for new reads and compresses them in real time
+              picopore-test          compresses to temporary files and checks that all datasets and attributes are equal (lossless modes only)
+              picopore-rename        renames groups and datasets within FAST5 files
+
+::
+
+    usage: picopore [-h] --mode {lossless,deep-lossless,raw} [--revert] [--fastq]
+                    [--summary] [--manual STR] [-v] [-y] [-t INT] [--prefix STR]
+                    [--skip-root] [--print-every INT]
                     [input [input ...]]
 
 ::
@@ -83,31 +89,26 @@ Usage
 
     optional arguments:
       -h, --help            show this help message and exit
-      -v, --version         show version number and exit
       --mode {lossless,deep-lossless,raw}
                             choose compression mode
       --revert              reverts files to original size (lossless modes only)
-      --realtime            monitor a directory for new reads and compress them in
-                            real time
-      --test                compress to a temporary file and check that all
-                            datasets and attributes are equal (lossless modes
-                            only)
       --fastq, --no-fastq   retain FASTQ data (raw mode only) (Default: --fastq)
       --summary, --no-summary
                             retain summary data (raw mode only) (Default: --no-
                             summary)
-      --manual MANUAL       manually remove only groups whose paths contain MANUAL (raw
-                            mode only, regular expressions permitted, overrides defaults)
-      --prefix PREFIX       add prefix to output files to prevent overwrite
+      --manual STR          manually remove only groups whose paths contain STR
+                            (raw mode only, regular expressions permitted,
+                            overrides defaults)
+      -v, --version         show version number and exit
       -y                    skip confirm step
-      -t THREADS, --threads THREADS
+      -t INT, --threads INT
                             number of threads (Default: 1)
+      --prefix STR          add prefix to output files to prevent overwrite
       --skip-root, --no-skip-root
                             ignore files in root input directories for albacore
                             realtime compression (Default: --no-skip-root)
-      --print-every PRINT_EVERY
-                            print a dot every approximately PRINT_EVERY files, or
-                            -1 to silence (Default: 100)
+      --print-every INT     print a dot every approximately INT files, or -1 to
+                            silence (Default: 100)
 
 It is necessary to choose one compression mode out of ``lossless``,
 ``deep-lossless``, and ``raw``.
