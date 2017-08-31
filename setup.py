@@ -39,6 +39,8 @@ setup(
 		],
   entry_points = {
         'console_scripts': ['picopore = picopore.__main__:main',
-                            'picopore-rename = picopore.rename:main'],
+                            'picopore-rename = picopore.rename:main',
+                            'picopore-test = picopore.test:main',
+                            'picopore-realtime = picopore.realtime:main'],
     },
 )

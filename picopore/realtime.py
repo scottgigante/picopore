@@ -20,7 +20,10 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from picopore.multiprocess import Multiprocessor
+from picopore.runner import PicoporeCompressionRunner
+from picopore.parse_args import parseArgs
 from picopore.util import log
+from picopore.__main__ import run
 
 class ReadsFolder(object):
     def __init__(self, runner):
@@ -71,3 +74,37 @@ class ReadsFolder(object):
 
         self.observer.stop()
         self.observer.join()
+
+class PicoporeRealtimeRunner(PicoporeCompressionRunner):
+
+    def __init__(self, args):
+        super(PicoporeRealtimeRunner, self).__init__(args)
+        _, name = chooseCompressFunc(self.revert, self.mode, self.fastq, self.summary, self.manual, realtime=True)
+        log(name + "...",end='')
+        if self.y:
+            print()
+        elif checkSure():
+            self.y = True
+        else:
+            exit(1)
+        self.readsFolder = ReadsFolder(self)
+
+    def execute(self):
+        self.readsFolder.start()
+        try:
+            while True:
+                sleep(5)
+        except KeyboardInterrupt:
+            log("\nExiting Picopore.")
+        self.readsFolder.stop()
+        return 0
+
+__description = """"picopore-realtime monitors a directory for new reads and compresses them in real time"""
+
+def main():
+    args = parseArgs(prog='picopore-realtime', description=__description)
+    runner = PicoporeRealtimeRunner(args)
+    return runner.execute()
+
+if __name__ == "__main__":
+    exit(main())

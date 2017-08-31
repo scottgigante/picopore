@@ -26,7 +26,6 @@ from picopore.util import recursiveFindFast5, log, getPrefixedFilename
 from picopore.compress import chooseCompressFunc
 from picopore.test import checkEquivalent
 from picopore.multiprocess import Multiprocessor
-from picopore.realtime import ReadsFolder
 
 def _process_func(filename, func, prefix, print_every):
         if prefix is not None:
@@ -125,61 +124,3 @@ class PicoporeCompressionRunner(AbstractPicoporeRunner):
         log("{}{}".format(preStr.ljust(str_len), str(self.preSize).rjust(num_len)))
         log("{}{}".format(postStr.ljust(str_len), str(self.postSize).rjust(num_len)))
         return self.preSize
-
-class PicoporeTestRunner(PicoporeCompressionRunner):
-
-    def __init__(self, args):
-        super(PicoporeTestRunner, self).__init__(args)
-        self.fileList = super(PicoporeTestRunner, self).getFileList()
-        self.y = True
-        self.originalFileList = self.fileList
-
-    def getFileList(self):
-        return self.fileList
-
-    def getReversionFileList(self):
-        return [getPrefixedFilename(f, self.prefix) for f in self.fileList]
-
-    def execute(self):
-        exitcode=1
-        if len(self.fileList) == 0:
-            return 0
-        try:
-            self.revert = False
-            self.run()
-
-            self.preSize = 0
-            self.postSize = 0
-            self.revert = True
-            self.fileList = self.getReversionFileList()
-            self.prefix = None
-            self.run()
-            exitcode = 0
-            for i in range(len(self.fileList)):
-                exitcode += checkEquivalent(self.originalFileList[i], self.fileList[i])
-        except Exception as e:
-            log("ERROR: " + str(e))
-        finally:
-            for f in self.fileList:
-                try:
-                    os.remove(f)
-                except OSError:
-                    # file never created
-                    pass
-        return exitcode
-
-class PicoporeRealtimeRunner(PicoporeCompressionRunner):
-
-    def __init__(self, args):
-        super(PicoporeRealtimeRunner, self).__init__(args)
-        self.readsFolder = ReadsFolder(self)
-
-    def execute(self):
-        self.readsFolder.start()
-        try:
-            while True:
-                sleep(5)
-        except KeyboardInterrupt:
-            log("\nExiting Picopore.")
-        self.readsFolder.stop()
-        return 0

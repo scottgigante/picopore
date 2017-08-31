@@ -56,8 +56,10 @@ class PicoporeRenameRunner(AbstractPicoporeRunner):
         log("Successfully renamed {} of {} files.".format(self.processed - sum(results), self.processed))
         return self.processed
 
+__description = """"A tool for renaming groups and datasets within Oxford Nanopore Technologies FAST5 files"""
+        
 def main():
-    args = parseRenameArgs()
+    args = parseRenameArgs(description=__description)
     runner = PicoporeRenameRunner(args)
     return runner.execute()
 

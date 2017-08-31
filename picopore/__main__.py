@@ -16,16 +16,16 @@
 """
 
 from picopore.parse_args import parseArgs
-from picopore.runner import *
+from picopore.runner import PicoporeCompressionRunner
+
+__description = """See also:
+\tpicopore-realtime\tmonitors a directory for new reads and compresses them in real time
+\tpicopore-test\tcompresses to temporary files and checks that all datasets and attributes are equal (lossless modes only)
+\tpicopore-rename\trenames groups and datasets within FAST5 files"""
 
 def main():
-    args = parseArgs()
-    if args.test:
-        runner = PicoporeTestRunner(args)
-    elif args.realtime:
-        runner = PicoporeRealtimeRunner(args)
-    else:
-        runner = PicoporeCompressionRunner(args)
+    args = parseArgs(description=__description)
+    runner = PicoporeCompressionRunner(args)
     return runner.execute()
 
 if __name__ == "__main__":

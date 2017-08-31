@@ -23,14 +23,6 @@ from picopore.version import __version__
 from picopore.util import log
 from picopore.compress import chooseCompressFunc
 
-def checkTestMode(test, args):
-    if args.test:
-        if "lossless" not in args.mode:
-            raise ArgumentError(test, "{} mode not reversible by Picopore. Test cancelled.".format(args.mode))
-        if args.prefix is None:
-            args.prefix = "picopore.test"
-    return args.test
-
 def checkInputs(args):
     args.input = [os.path.abspath(i) for i in args.input]
     # we go recursively - better remove duplicates
@@ -43,19 +35,6 @@ def checkInputs(args):
         if not subDir:
             keepDirs.append(args.input[i])
     return keepDirs
-
-def checkRealtime(args):
-    if args.realtime:
-        _, name = chooseCompressFunc(args.revert, args.mode, args.fastq, args.summary, args.manual, args.realtime)
-        log(name + "...",end='')
-        if args.y:
-            print('')
-            return True
-        elif checkSure():
-            args.y = True
-            return True
-        else:
-            return False
 
 def checkSure():
     response = input("Are you sure? (yes|no): ")
@@ -96,36 +75,35 @@ class AutoBool(Action):
 def addCommonArgs(parser):
     parser.add_argument('-v', '--version', action='version', version='Picopore {}'.format(__version__), help="show version number and exit")
     parser.add_argument("-y", action="store_true", default=False, help="skip confirm step")
-    parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)")
-    parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite")
+    parser.add_argument("-t", "--threads", type=int, default=1, help="number of threads (Default: 1)", metavar="INT")
+    parser.add_argument("--prefix", default=None, help="add prefix to output files to prevent overwrite", metavar="STR")
     parser.add_argument("--skip-root", action=AutoBool, default=False, help="ignore files in root input directories for albacore realtime compression")
-    parser.add_argument("--print-every", type=int, default=100, help="print a dot every approximately PRINT_EVERY files, or -1 to silence (Default: 100)", dest="print_every")
+    parser.add_argument("--print-every", type=int, default=100, help="print a dot every approximately INT files, or -1 to silence (Default: 100)", metavar="INT")
     parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
     return parser
 
-
-def parseArgs():
-    parser = ArgumentParser(description="A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data", prog="picopore")
+__description = """"A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data"""
+def parseArgs(prog='picopore', description=None):
+    if description is not None:
+        description = __description + "\n\n" + description
+    else:
+        description = __description
+    parser = ArgumentParser(description=description, prog=prog)
     parser.add_argument("--mode", choices=('lossless', 'deep-lossless', 'raw'), help="choose compression mode", required=True)
-    mut_excl = parser.add_mutually_exclusive_group()
-    mut_excl.add_argument("--realtime", default=False, action="store_true", help="monitor a directory for new reads and compress them in real time")
-    test = mut_excl.add_argument("--test", default=False, action="store_true", help="compress to a temporary file and check that all datasets and attributes are equal (lossless modes only)")
     parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
     parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
     parser.add_argument("--summary", action=AutoBool, default=False, help="retain summary data (raw mode only)")
-    parser.add_argument("--manual", default=None, help="manually remove only groups whose paths contain MANUAL (raw mode only, regular expressions permitted, overrides defaults)")
+    parser.add_argument("--manual", default=None, help="manually remove only groups whose paths contain STR (raw mode only, regular expressions permitted, overrides defaults)", metavar="STR")
     parser = addCommonArgs(parser)
     args = parser.parse_args()
 
-    args.test = checkTestMode(test, args)
     args.input = checkInputs(args)
-    args.realtime = checkRealtime(args)
     args.group = "all" # TODO: is it worth supporting group?
 
     return args
 
-def parseRenameArgs():
-    parser = ArgumentParser(description="A tool for renaming groups and datasets within Oxford Nanopore Technologies FAST5 files", prog="picopore-rename")
+def parseRenameArgs(prog='picopore-rename', description):
+    parser = ArgumentParser(description=description, prog=prog)
     parser.add_argument('-p', '--pattern', required=True, help="String or regex to replace")
     parser.add_argument('-r', '--replacement', required=True, help="String or regex replacement for PATTERN")
     parser = addCommonArgs(parser)
