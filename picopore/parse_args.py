@@ -27,14 +27,17 @@ from picopore.version import __version__
 
 def checkDeprecatedArgs():
     args = sys.argv[1:]
-    if "--realtime" in args:
-        args.remove('--realtime')
-        warnings.warn("picopore --realtime will be deprecated in 1.3.0. Use picopore-realtime instead.",FutureWarning)
-        exit(subprocess.call(['picopore-realtime'] + args))
-    if "--test" in args:
-        args.remove('--test')
-        warnings.warn("picopore --test will be deprecated in 1.3.0. Use picopore-test instead.",FutureWarning)
-        exit(subprocess.call(['picopore-test'] + args))
+    try:
+        if "--realtime" in args:
+            args.remove('--realtime')
+            warnings.warn("picopore --realtime will be deprecated in 1.3.0. Use picopore-realtime instead.",FutureWarning)
+            exit(subprocess.call(['picopore-realtime'] + args))
+        if "--test" in args:
+            args.remove('--test')
+            warnings.warn("picopore --test will be deprecated in 1.3.0. Use picopore-test instead.",FutureWarning)
+            exit(subprocess.call(['picopore-test'] + args))
+    except KeyboardInterrupt:
+        exit(0)
 
 def checkInputs(args):
     args.input = [os.path.abspath(i) for i in args.input]

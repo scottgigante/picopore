@@ -209,4 +209,6 @@ def compress(func, filename, group="all"):
         return os.path.getsize(filename)
     except Exception as e:
         log("ERROR: {} on file {}".format(str(e), filename))
-        return 0
+        if os.path.isfile("{}.tmp".format(filename)):
+            os.remove("{}.tmp".format(filename))
+        return os.path.getsize(filename)
