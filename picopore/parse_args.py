@@ -15,13 +15,28 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from argparse import ArgumentParser, ArgumentError, Action, RawDescriptionHelpFormatter
 import os
+import sys
+import subprocess
+import warnings
+
+from argparse import ArgumentParser, ArgumentError, Action, RawDescriptionHelpFormatter
 from builtins import input
 
 from picopore.version import __version__
 from picopore.util import log
 from picopore.compress import chooseCompressFunc
+
+def checkDeprecatedArgs():
+    args = sys.argv[1:].split()
+    if "--realtime" in args:
+        args.remove('--realtime')
+        warnings.warn("picopore --realtime will be deprecated in 1.3.0. Use picopore-realtime instead.",FutureWarning)
+        exit(subprocess.call(['picopore-realtime'] + args))
+    if "--test" in args:
+        args.remove('--test')
+        warnings.warn("picopore --test will be deprecated in 1.3.0. Use picopore-test instead.",FutureWarning)
+        exit(subprocess.call(['picopore-test'] + args))
 
 def checkInputs(args):
     args.input = [os.path.abspath(i) for i in args.input]
@@ -84,6 +99,7 @@ def addCommonArgs(parser):
 
 __description = """A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data"""
 def parseArgs(description=None, prog='picopore'):
+    checkDeprecatedArgs()
     if description is not None:
         description = __description + "\n\n" + description
     else:
