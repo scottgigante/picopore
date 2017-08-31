@@ -102,7 +102,7 @@ class PicoporeRealtimeRunner(PicoporeCompressionRunner):
 __description = """"picopore-realtime monitors a directory for new reads and compresses them in real time"""
 
 def main():
-    args = parseArgs(prog='picopore-realtime', description=__description)
+    args = parseArgs(description=__description, prog='picopore-realtime')
     runner = PicoporeRealtimeRunner(args)
     return runner.execute()
 

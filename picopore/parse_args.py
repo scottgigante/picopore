@@ -83,7 +83,7 @@ def addCommonArgs(parser):
     return parser
 
 __description = """"A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data"""
-def parseArgs(prog='picopore', description=None):
+def parseArgs(description=None, prog='picopore'):
     if description is not None:
         description = __description + "\n\n" + description
     else:
@@ -102,7 +102,7 @@ def parseArgs(prog='picopore', description=None):
 
     return args
 
-def parseRenameArgs(prog='picopore-rename', description):
+def parseRenameArgs(description, prog='picopore-rename'):
     parser = ArgumentParser(description=description, prog=prog)
     parser.add_argument('-p', '--pattern', required=True, help="String or regex to replace")
     parser.add_argument('-r', '--replacement', required=True, help="String or regex replacement for PATTERN")

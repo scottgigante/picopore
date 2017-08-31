@@ -143,7 +143,7 @@ class PicoporeTestRunner(PicoporeCompressionRunner):
 __description = """"picopore-test compresses to temporary files and checks that all datasets and attributes are equal (lossless modes only)"""
         
 def main():
-    args = parseArgs(prog='picopore-test', description=__description)
+    args = parseArgs(description=__description, prog='picopore-test')
     runner = PicoporeTestRunner(args)
     return runner.execute()
 
