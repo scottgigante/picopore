@@ -33,7 +33,7 @@ def rename(filename, pattern, replacement):
                 log("Renamed {} to {}".format(path, newPath))
         return 0
     except Exception as e:
-        log("ERROR: " + str(e))
+        log("ERROR: {} on file {}".format(str(e), filename))
         return 1
 
 class PicoporeRenameRunner(AbstractPicoporeRunner):

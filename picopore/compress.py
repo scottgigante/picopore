@@ -208,5 +208,5 @@ def compress(func, filename, group="all"):
         subprocess.call(["mv","{}.tmp".format(filename),filename])
         return os.path.getsize(filename)
     except Exception as e:
-        log("ERROR: " + str(e))
-        return None
+        log("ERROR: {} on file {}".format(str(e), filename))
+        return 0
