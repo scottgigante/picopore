@@ -17,8 +17,6 @@
 
 import os
 import sys
-import subprocess
-import warnings
 
 from argparse import ArgumentParser, ArgumentError, Action, RawDescriptionHelpFormatter
 from builtins import input
@@ -26,15 +24,18 @@ from builtins import input
 from picopore.version import __version__
 
 def checkDeprecatedArgs():
+    import subprocess
+    import warnings
+    import signal
     args = sys.argv[1:]
     if "--realtime" in args:
         args.remove('--realtime')
         args = ['picopore-realtime'] + args
-        warnings.warn("picopore --realtime will be deprecated in 1.3.0. Use picopore-realtime instead.",FutureWarning)
+        warnings.warn("picopore --realtime will be deprecated in 2.0. Use picopore-realtime instead.",FutureWarning)
     elif "--test" in args:
         args.remove('--test')
         args = ['picopore-test'] + args
-        warnings.warn("picopore --test will be deprecated in 1.3.0. Use picopore-test instead.",FutureWarning)
+        warnings.warn("picopore --test will be deprecated in 2.0. Use picopore-test instead.",FutureWarning)
     else:
         return
     p = subprocess.Popen(args)
