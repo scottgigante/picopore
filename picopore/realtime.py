@@ -21,9 +21,9 @@ from watchdog.events import PatternMatchingEventHandler
 
 from picopore.multiprocess import Multiprocessor
 from picopore.runner import PicoporeCompressionRunner
+from picopore.compress import chooseCompressFunc
 from picopore.parse_args import parseArgs
 from picopore.util import log
-from picopore.__main__ import run
 
 class ReadsFolder(object):
     def __init__(self, runner):

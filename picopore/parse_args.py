@@ -24,8 +24,6 @@ from argparse import ArgumentParser, ArgumentError, Action, RawDescriptionHelpFo
 from builtins import input
 
 from picopore.version import __version__
-from picopore.util import log
-from picopore.compress import chooseCompressFunc
 
 def checkDeprecatedArgs():
     args = sys.argv[1:]
