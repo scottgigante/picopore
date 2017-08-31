@@ -82,13 +82,13 @@ def addCommonArgs(parser):
     parser.add_argument("input", nargs="*", help="list of directories or fast5 files to shrink")
     return parser
 
-__description = """"A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data"""
+__description = """A tool for reducing the size of an Oxford Nanopore Technologies dataset without losing any data"""
 def parseArgs(description=None, prog='picopore'):
     if description is not None:
         description = __description + "\n\n" + description
     else:
         description = __description
-    parser = ArgumentParser(description=description, prog=prog, formatter=RawDescriptionHelpFormatter)
+    parser = ArgumentParser(description=description, prog=prog, formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument("--mode", choices=('lossless', 'deep-lossless', 'raw'), help="choose compression mode", required=True)
     parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
     parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
