@@ -24,7 +24,6 @@ import numpy as np
 from picopore.parse_args import checkSure
 from picopore.util import recursiveFindFast5, log, getPrefixedFilename
 from picopore.compress import chooseCompressFunc
-from picopore.test import checkEquivalent
 from picopore.multiprocess import Multiprocessor
 
 def _process_func(filename, func, prefix, print_every):
