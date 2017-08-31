@@ -15,7 +15,7 @@
     along with Picopore.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from argparse import ArgumentParser, ArgumentError, Action
+from argparse import ArgumentParser, ArgumentError, Action, RawDescriptionHelpFormatter
 import os
 from builtins import input
 
@@ -88,7 +88,7 @@ def parseArgs(description=None, prog='picopore'):
         description = __description + "\n\n" + description
     else:
         description = __description
-    parser = ArgumentParser(description=description, prog=prog)
+    parser = ArgumentParser(description=description, prog=prog, formatter=RawDescriptionHelpFormatter)
     parser.add_argument("--mode", choices=('lossless', 'deep-lossless', 'raw'), help="choose compression mode", required=True)
     parser.add_argument("--revert", default=False, action="store_true", help="reverts files to original size (lossless modes only)")
     parser.add_argument("--fastq", action=AutoBool, default=True, help="retain FASTQ data (raw mode only)")
