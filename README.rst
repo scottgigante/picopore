@@ -1,3 +1,8 @@
+Author's Note
+=============
+
+`picopore` is no longer under active development. Due to improvements in ONT's native HDF5 compression, `lossless` and `deep-lossless` compression no longer effectively reduce the size of nanopore files. `picopore`'s `raw` compression may still be of interest to users, but is no longer being actively maintained. 
+
 Picopore v1.2.0
 ===============
 
