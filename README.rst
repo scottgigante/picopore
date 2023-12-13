@@ -56,7 +56,7 @@ Currently, ``h5py`` is only available on Windows via ``conda``.
 Requirements
 ~~~~~~~~~~~~
 
-Picopore runs on Python 2.7, 3.4, 3.5, 3.6 or 3.7 with development headers (``python-dev`` or similar).
+Picopore runs on Python 3.4, 3.5, 3.6 or 3.7 with development headers (``python-dev`` or similar).
 
 Picopore requires ``h5repack`` from ``hdf5-tools``, which can be
 downloaded from https://support.hdfgroup.org/downloads/index.html or
@@ -65,7 +65,6 @@ using ``sudo apt-get install hdf5-tools`` or similar.
 Picopore requires the following Python packages:
 
 * ``h5py``
-* ``future``
 * ``watchdog`` (for real-time compression)
 
 In addition, ``h5py`` requires HDF5 1.8.4 or later (``libhdf5-dev`` or similar). Difficulties resolving dependencies of ``h5py`` can be resolved by installing from your package manager, using ``sudo apt-get install python-h5py`` or similar.
