@@ -1,4 +1,3 @@
-from __future__ import print_function
 import subprocess
 import os
 import errno
